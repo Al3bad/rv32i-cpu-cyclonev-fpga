@@ -18,7 +18,7 @@ localparam INC_BY = 32'h1;
 
 always @(posedge clk ) begin
     if (pcEn) begin
-        pcOutput <= pcSrc? (pcOutput + $signed(offset)) : (pcOutput + INC_BY);
+        pcOutput <= pcSrc? (pcOutput + $signed(offset[31:1])) : (pcOutput + INC_BY);
     end
 end
 
