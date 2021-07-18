@@ -35,9 +35,9 @@ initial begin
     // J-type Instruction
     // imm[20] --- imm[10:1] --- imm[11] --- imm[19:12] --- rd --- OPCODE
 
-    inst = 32'b00000000111000000000000001101111;
-
+    inst = 32'h0200006F;
     #2;
+    $display("Result Offset: 0x%0h", immOutput);
 
 end
     

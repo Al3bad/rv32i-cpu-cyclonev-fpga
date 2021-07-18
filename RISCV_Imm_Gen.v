@@ -19,10 +19,10 @@ module RISCV_Imm_Gen (
         else begin
             case (inst[6:0])
                 7'b0100011: immOutput = $signed(storeImm);              // S-type instructions  
-                7'b1100011: immOutput = $signed(branchImm << 4'h01);    // B-type instructions  
-                7'b1101111: immOutput = $signed(jumpImm   << 4'h0C);    // J-type instructions  
-                7'b0110111: immOutput = $signed(upperImm  << 4'h01);    // U-type instructions 
-                7'b0010111: immOutput = $signed(upperImm  << 4'h01);    // U-type instructions 
+                7'b1100011: immOutput = $signed(branchImm) << 4'h01;    // B-type instructions  
+                7'b0110111: immOutput = $signed(upperImm)  << 4'h0C;    // U-type instructions 
+                7'b0010111: immOutput = $signed(upperImm)  << 4'h0C;    // U-type instructions 
+                7'b1101111: immOutput = $signed(jumpImm)   << 4'h01;    // J-type instructions  
                 default: immOutput = 0; 
             endcase
         end

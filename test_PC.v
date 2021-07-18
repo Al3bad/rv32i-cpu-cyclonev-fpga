@@ -4,12 +4,12 @@
 module test_PC;
 
 reg clk, pcSrc, pcEn;
-reg [31:0] addrIn;
+reg [31:0] offset;
 
 wire [31:0] pcOut;
 
-RISC_PC pc (.clk(clk), .pcSrc(pcSrc), .pcEn(pcEn),
-            .addressInput(addrIn),
+RISCV_PC pc (.clk(clk), .pcSrc(pcSrc), .pcEn(pcEn),
+            .offset(offset),
             .pcOutput(pcOut)); 
 
 initial begin
@@ -27,19 +27,27 @@ always begin
 end
 
 always @(posedge clk) begin
-    
     #2
 
     #2
 
     #2
+
+    #2
+
+    #2
+
+    #2
+    $display("Result address: 0x%0h with Offset: 0x%0h", pcOut, offset);
 
     pcSrc = 1'b1;
-    addrIn = 32'h20;
+    offset = 32'd32;
     #2
+    $display("Result address: 0x%0h with Offset: 0x%0h", pcOut, offset);
 
     pcSrc = 1'b0;
     #2
+    $display("Result address: 0x%0h with Offset: 0x%0h", pcOut, offset);
 
     #2
 

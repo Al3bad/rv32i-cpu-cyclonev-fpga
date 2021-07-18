@@ -2,24 +2,19 @@
 
 module RISCV_ALU (
     input [31:0] A, B, 
-    input [2:0] func3,
-    input func7,
+    input [3:0] ALUctrl,
 
     output reg [31:0] ALUout,
-    output Zero
+    output reg Zero
 );
 
-wire [3:0] ALUctl;
-
-// Construct ALUctr
-assign ALUctl = {func7, func3};
 
 // If ALUout is 0, set ZERO signal
-assign Zero = (ALUout == 0);
 
-always @(ALUctl, A, B) begin
-    // $display("Concatenation of %b and %b is %b", func7, func3, ALUctl);
-    case (ALUctl)
+always @(ALUctrl, A, B) begin
+    Zero = (ALUout == 0);
+    // $display("Concatenation of %b and %b is %b", func7, func3, ALUctrl);
+    case (ALUctrl)
         4'b0000: ALUout = A + B;
         4'b1000: ALUout = A - B;
         4'b0111: ALUout = A & B;
