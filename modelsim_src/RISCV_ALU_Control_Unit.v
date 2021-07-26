@@ -17,7 +17,8 @@ localparam BTYPE_OP = 2'b01;    // Branch instruction
 localparam L_OP     = 2'b10;    // Load instruction
 localparam S_OP     = 2'b10;    // Store instruction
 
-always @(ALUOp, func3, func7) begin
+always @(ALUOp, func3, func7, RTYPE) begin
+    ALUctrl = 4'b0000;
     if (ALUOp == RTYPE_OP) ALUctrl = RTYPE;
     else if (ALUOp == BTYPE_OP) ALUctrl = SUB;
     else if ((ALUOp == L_OP) || (ALUOp == S_OP)) ALUctrl = ADD;

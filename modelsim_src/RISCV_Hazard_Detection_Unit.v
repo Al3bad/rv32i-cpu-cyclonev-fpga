@@ -31,11 +31,13 @@ reg branchIsTaken;
 
 always @(opcode, func3, zero, lessThan) begin
     // TODO: handle the unsigned branches - BLTU & BGEU
-    if(^pcSrc === 1'bx || ^pcSrc === 1'bz ) begin
+//    if(^pcSrc === 1'bx || ^pcSrc === 1'bz ) begin
+//        flush = 1'b0;
+//        pcSrc = 1'b0;
+//    end else begin
         flush = 1'b0;
-        pcSrc = 1'b0;
-    end else begin
-        if (opcode == branchInst)      
+		  pcSrc = 1'b0;
+        if (opcode == branchInst)
             if((func3 == 3'b000 || func3 == 3'b101) && zero  ||      // BEQ - BG(E)
             func3 == 3'b001 && !zero    ||      // BNE
             func3 == 3'b100 && lessThan ||      // BLT
@@ -43,6 +45,9 @@ always @(opcode, func3, zero, lessThan) begin
                 branchIsTaken = 1'b1;
             else
                 branchIsTaken = 1'b0;
+        else
+            branchIsTaken = 1'b0;
+
 
         if (opcode == jumpInst || branchIsTaken) begin
             flush = 1'b1;
@@ -52,6 +57,6 @@ always @(opcode, func3, zero, lessThan) begin
             pcSrc = 1'b0;
             
         end
-    end
+//    end
 end
 endmodule

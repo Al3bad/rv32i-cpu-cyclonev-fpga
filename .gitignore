@@ -1,4 +1,8 @@
 *
-
 !.gitignore
-!*.v
+!CPU.bdf
+!CPU_pipelined.bdf
+!syn.sh
+
+!/modelsim_src
+!/modelsim_src/*.v

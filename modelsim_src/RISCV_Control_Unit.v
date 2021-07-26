@@ -23,6 +23,7 @@ always @(opcode) begin
 	MemRead    = 1'b0;
 	MemWrite   = 1'b0;
 	ALUSrc     = 1'b0;
+	ALUOp      = 2'b00;
 
     if(opcode == arithmeticInst)
         ALUOp = 2'b00;
