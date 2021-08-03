@@ -1,8 +1,22 @@
 *
 !.gitignore
+!PLL_25*
+!RISCV_CPU_FPGA.v
+!RISCV_CPU_FPGA.htm
+!RISCV_CPU_FPGA_assignment_defaults.qdf
 !CPU.bdf
 !CPU_pipelined.bdf
+!soc_system.qsys
 !syn.sh
 
-!/modelsim_src
-!/modelsim_src/*.v
+!/v_src
+!/v_src/*.v
+!/mux_src
+!/mux_src/**
+!/module_symbols
+!/module_symbols/*
+!/ip
+!/ip/**
+!/soc_system
+!/soc_system/**
+

@@ -1,0 +1,114 @@
+/*
+WARNING: Do NOT edit the input and output ports in this file in a text
+editor if you plan to continue editing the block that represents it in
+the Block Editor! File corruption is VERY likely to occur.
+*/
+/*
+Copyright (C) 2020  Intel Corporation. All rights reserved.
+Your use of Intel Corporation's design tools, logic functions 
+and other software and tools, and any partner logic 
+functions, and any output files from any of the foregoing 
+(including device programming or simulation files), and any 
+associated documentation or information are expressly subject 
+to the terms and conditions of the Intel Program License 
+Subscription Agreement, the Intel Quartus Prime License Agreement,
+the Intel FPGA IP License Agreement, or other applicable license
+agreement, including, without limitation, that your use is for
+the sole purpose of programming logic devices manufactured by
+Intel and sold by Intel or its authorized distributors.  Please
+refer to the applicable agreement for further details, at
+https://fpgasoftware.intel.com/eula.
+*/
+(header "symbol" (version "1.2"))
+(symbol
+	(rect 64 64 408 240)
+	(text "control_unit" (rect 152 160 208 172)(font "Arial" ))
+	(text "inst" (rect 8 160 25 172)(font "Arial" ))
+	(port
+		(pt 48 0)
+		(input)
+		(text "opcode[6..0]" (rect 0 0 61 12)(font "Arial" ))
+		(text "opcode[6..0]" (rect 40 25 52 86)(font "Arial" )(vertical))
+		(line (pt 48 0)(pt 48 16)(line_width 3))
+	)
+	(port
+		(pt 80 0)
+		(input)
+		(text "func3[2..0]" (rect 0 0 54 12)(font "Arial" ))
+		(text "func3[2..0]" (rect 72 25 84 79)(font "Arial" )(vertical))
+		(line (pt 80 0)(pt 80 16)(line_width 3))
+	)
+	(port
+		(pt 64 0)
+		(input)
+		(text "func7" (rect 0 0 28 12)(font "Arial" ))
+		(text "func7" (rect 56 25 68 53)(font "Arial" )(vertical))
+		(line (pt 64 0)(pt 64 17))
+	)
+	(port
+		(pt 344 104)
+		(input)
+		(text "zero" (rect 0 0 20 12)(font "Arial" ))
+		(text "zero" (rect 299 96 319 108)(font "Arial" ))
+		(line (pt 328 104)(pt 344 104))
+	)
+	(port
+		(pt 344 120)
+		(input)
+		(text "lessThan" (rect 0 0 43 12)(font "Arial" ))
+		(text "lessThan" (rect 276 112 319 124)(font "Arial" ))
+		(line (pt 328 120)(pt 344 120))
+	)
+	(port
+		(pt 200 0)
+		(output)
+		(text "ALUctrl[3..0]" (rect 144 0 206 12)(font "Arial" ))
+		(text "ALUctrl[3..0]" (rect 192 23 204 85)(font "Arial" )(vertical))
+		(line (pt 200 0)(pt 200 16)(line_width 3))
+	)
+	(port
+		(pt 0 104)
+		(output)
+		(text "flush" (rect 144 0 168 12)(font "Arial" ))
+		(text "flush" (rect 24 96 48 108)(font "Arial" ))
+		(line (pt 16 104)(pt 0 104))
+	)
+	(port
+		(pt 0 120)
+		(output)
+		(text "pcSrc" (rect 144 0 172 12)(font "Arial" ))
+		(text "pcSrc" (rect 24 112 52 124)(font "Arial" ))
+		(line (pt 16 120)(pt 0 120))
+	)
+	(port
+		(pt 184 0)
+		(output)
+		(text "ALUSrc" (rect 144 0 181 12)(font "Arial" ))
+		(text "ALUSrc" (rect 176 23 188 60)(font "Arial" )(vertical))
+		(line (pt 184 0)(pt 184 16))
+	)
+	(port
+		(pt 216 0)
+		(output)
+		(text "RegWrite" (rect 144 0 190 12)(font "Arial" ))
+		(text "RegWrite" (rect 208 23 220 69)(font "Arial" )(vertical))
+		(line (pt 216 0)(pt 216 16))
+	)
+	(port
+		(pt 232 0)
+		(output)
+		(text "MemRead" (rect 144 0 193 12)(font "Arial" ))
+		(text "MemRead" (rect 224 23 236 72)(font "Arial" )(vertical))
+		(line (pt 232 0)(pt 232 16))
+	)
+	(port
+		(pt 248 0)
+		(output)
+		(text "MemWrite" (rect 144 0 193 12)(font "Arial" ))
+		(text "MemWrite" (rect 240 23 252 72)(font "Arial" )(vertical))
+		(line (pt 248 0)(pt 248 16))
+	)
+	(drawing
+		(rectangle (rect 16 16 328 160))
+	)
+)
