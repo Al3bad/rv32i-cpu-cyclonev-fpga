@@ -2,6 +2,7 @@
 !.gitignore
 !PLL_25*
 !RISCV_CPU_FPGA.v
+!RISCV_CPU_FPGA.qpf
 !RISCV_CPU_FPGA.htm
 !RISCV_CPU_FPGA_assignment_defaults.qdf
 !CPU.bdf
@@ -17,6 +18,3 @@
 !/module_symbols/*
 !/ip
 !/ip/**
-!/soc_system
-!/soc_system/**
-

@@ -5,29 +5,29 @@
 
 module RISCV_CPU_FPGA(
 
-	//////////// CLOCK //////////
-	input 		          		FPGA_CLK1_50,
-	input 		          		FPGA_CLK2_50,
-	input 		          		FPGA_CLK3_50,
+    //////////// CLOCK //////////
+    input 		          		FPGA_CLK1_50,
+    input 		          		FPGA_CLK2_50,
+    input 		          		FPGA_CLK3_50,
 
-	//////////// HPS //////////
-	inout 		          		HPS_CONV_USB_N,
-	output		    [14:0]		HPS_DDR3_ADDR,
-	output		     [2:0]		HPS_DDR3_BA,
-	output		          		HPS_DDR3_CAS_N,
-	output		          		HPS_DDR3_CKE,
-	output		          		HPS_DDR3_CK_N,
-	output		          		HPS_DDR3_CK_P,
-	output		          		HPS_DDR3_CS_N,
-	output		     [3:0]		HPS_DDR3_DM,
-	inout 		    [31:0]		HPS_DDR3_DQ,
-	inout 		     [3:0]		HPS_DDR3_DQS_N,
-	inout 		     [3:0]		HPS_DDR3_DQS_P,
-	output		          		HPS_DDR3_ODT,
-	output		          		HPS_DDR3_RAS_N,
-	output		          		HPS_DDR3_RESET_N,
-	input 		          		HPS_DDR3_RZQ,
-	output		          		HPS_DDR3_WE_N,
+    //////////// HPS //////////
+    inout 		          		HPS_CONV_USB_N,
+    output		    [14:0]		HPS_DDR3_ADDR,
+    output		     [2:0]		HPS_DDR3_BA,
+    output		          		HPS_DDR3_CAS_N,
+    output		          		HPS_DDR3_CKE,
+    output		          		HPS_DDR3_CK_N,
+    output		          		HPS_DDR3_CK_P,
+    output		          		HPS_DDR3_CS_N,
+    output		     [3:0]		HPS_DDR3_DM,
+    inout 		    [31:0]		HPS_DDR3_DQ,
+    inout 		     [3:0]		HPS_DDR3_DQS_N,
+    inout 		     [3:0]		HPS_DDR3_DQS_P,
+    output		          		HPS_DDR3_ODT,
+    output		          		HPS_DDR3_RAS_N,
+    output		          		HPS_DDR3_RESET_N,
+    input 		          		HPS_DDR3_RZQ,
+    output		          		HPS_DDR3_WE_N,
 //	output		          		HPS_ENET_GTX_CLK,
 //	inout 		          		HPS_ENET_INT_N,
 //	output		          		HPS_ENET_MDC,
@@ -60,14 +60,14 @@ module RISCV_CPU_FPGA(
 //	input 		          		HPS_USB_NXT,
 //	output		          		HPS_USB_STP,
 
-	//////////// KEY //////////
-	input 		     [1:0]		KEY,
+    //////////// KEY //////////
+    input 		     [1:0]		KEY,
 
-	//////////// LED //////////
-	output		     [7:0]		LED,
+    //////////// LED //////////
+    output		     [7:0]		LED,
 
-	//////////// SW //////////
-	input 		     [3:0]		SW
+    //////////// SW //////////
+    input 		     [3:0]		SW
 );
 
 
@@ -78,6 +78,8 @@ module RISCV_CPU_FPGA(
 
 wire DDR3_CLK;
 wire PLL_25_CLK;
+wire Debounce_KEY0;
+wire Debounce_KEY1;
 
 //=======================================================
 //  SYSTEM : Structural coding
@@ -85,42 +87,120 @@ wire PLL_25_CLK;
 
 // Subsystem
 soc_system u0 (
-        .clk_clk                               (FPGA_CLK1_50),           //  clk.clk
-        .ddr3_clk_clk                          (DDR3_CLK),               //  ddr3_clk.clk
+    .clk_clk                               (FPGA_CLK1_50),           //  clk.clk
+    .ddr3_clk_clk                          (DDR3_CLK),               //  ddr3_clk.clk
 
-        //HPS ddr3
-        .memory_mem_a                          (HPS_DDR3_ADDR),           //  memory.mem_a
-        .memory_mem_ba                         (HPS_DDR3_BA),             //  .mem_ba
-        .memory_mem_ck                         (HPS_DDR3_CK_P),           //  .mem_ck
-        .memory_mem_ck_n                       (HPS_DDR3_CK_N),           //  .mem_ck_n
-        .memory_mem_cke                        (HPS_DDR3_CKE),            //  .mem_cke
-        .memory_mem_cs_n                       (HPS_DDR3_CS_N),           //  .mem_cs_n
-        .memory_mem_ras_n                      (HPS_DDR3_RAS_N),          //  .mem_ras_n
-        .memory_mem_cas_n                      (HPS_DDR3_CAS_N),          //  .mem_cas_n
-        .memory_mem_we_n                       (HPS_DDR3_WE_N),           //  .mem_we_n
-        .memory_mem_reset_n                    (HPS_DDR3_RESET_N),        //  .mem_reset_n
-        .memory_mem_dq                         (HPS_DDR3_DQ),             //  .mem_dq
-        .memory_mem_dqs                        (HPS_DDR3_DQS_P),          //  .mem_dqs
-        .memory_mem_dqs_n                      (HPS_DDR3_DQS_N),          //  .mem_dqs_n
-        .memory_mem_odt                        (HPS_DDR3_ODT),            //  .mem_odt
-        .memory_mem_dm                         (HPS_DDR3_DM),             //  .mem_dm
-        .memory_oct_rzqin                      (HPS_DDR3_RZQ),            //  .oct_rzqin
+    //HPS ddr3
+    .memory_mem_a                          (HPS_DDR3_ADDR),           //  memory.mem_a
+    .memory_mem_ba                         (HPS_DDR3_BA),             //  .mem_ba
+    .memory_mem_ck                         (HPS_DDR3_CK_P),           //  .mem_ck
+    .memory_mem_ck_n                       (HPS_DDR3_CK_N),           //  .mem_ck_n
+    .memory_mem_cke                        (HPS_DDR3_CKE),            //  .mem_cke
+    .memory_mem_cs_n                       (HPS_DDR3_CS_N),           //  .mem_cs_n
+    .memory_mem_ras_n                      (HPS_DDR3_RAS_N),          //  .mem_ras_n
+    .memory_mem_cas_n                      (HPS_DDR3_CAS_N),          //  .mem_cas_n
+    .memory_mem_we_n                       (HPS_DDR3_WE_N),           //  .mem_we_n
+    .memory_mem_reset_n                    (HPS_DDR3_RESET_N),        //  .mem_reset_n
+    .memory_mem_dq                         (HPS_DDR3_DQ),             //  .mem_dq
+    .memory_mem_dqs                        (HPS_DDR3_DQS_P),          //  .mem_dqs
+    .memory_mem_dqs_n                      (HPS_DDR3_DQS_N),          //  .mem_dqs_n
+    .memory_mem_odt                        (HPS_DDR3_ODT),            //  .mem_odt
+    .memory_mem_dm                         (HPS_DDR3_DM),             //  .mem_dm
+    .memory_oct_rzqin                      (HPS_DDR3_RZQ),            //  .oct_rzqin
 
-        // Avalon bridge
-        .ddr3_hps_f2h_sdram0_clock_clk          (DDR3_CLK),               //  ddr3_0_hps_f2h_sdram0_clock.clk
-        .ddr3_hps_f2h_sdram0_data_address       (ddr3_avl_addr),          //  ddr3_0_hps_f2h_sdram0_data.address
-        .ddr3_hps_f2h_sdram0_data_read          (ddr3_avl_read_req),      //  .read
-        .ddr3_hps_f2h_sdram0_data_readdata      (ddr3_avl_rdata),         //  .readdata
-        .ddr3_hps_f2h_sdram0_data_write         (ddr3_avl_write_req),     //  .write
-        .ddr3_hps_f2h_sdram0_data_writedata     (ddr3_avl_wdata),         //  .writedata
-        .ddr3_hps_f2h_sdram0_data_readdatavalid (ddr3_avl_rdata_valid),   //  .readdatavalid
-        .ddr3_hps_f2h_sdram0_data_waitrequest   (ddr3_avl_ready),         //  .waitrequest
-        .ddr3_hps_f2h_sdram0_data_byteenable    (16'hffff),               //  .byteenable
-        .ddr3_hps_f2h_sdram0_data_burstcount    (ddr3_avl_size)           //  .burstcount
+    // Avalon bridge
+    .ddr3_hps_f2h_sdram0_clock_clk          (DDR3_CLK),               //  ddr3_0_hps_f2h_sdram0_clock.clk
+    .ddr3_hps_f2h_sdram0_data_address       (ddr3_avl_addr),          //  ddr3_0_hps_f2h_sdram0_data.address
+    .ddr3_hps_f2h_sdram0_data_read          (ddr3_avl_read_req),      //  .read
+    .ddr3_hps_f2h_sdram0_data_readdata      (ddr3_avl_rdata),         //  .readdata
+    .ddr3_hps_f2h_sdram0_data_write         (ddr3_avl_write_req),     //  .write
+    .ddr3_hps_f2h_sdram0_data_writedata     (ddr3_avl_wdata),         //  .writedata
+    .ddr3_hps_f2h_sdram0_data_readdatavalid (ddr3_avl_rdata_valid),   //  .readdatavalid
+    .ddr3_hps_f2h_sdram0_data_waitrequest   (ddr3_avl_wait),         //  .waitrequest
+    .ddr3_hps_f2h_sdram0_data_byteenable    (4'hf),               //  .byteenable
+    .ddr3_hps_f2h_sdram0_data_burstcount    (ddr3_avl_size)           //  .burstcount
 );
 
 // 25MHz clk that will be used to drive the ROM
 PLL_25 pll (.refclk(FPGA_CLK1_50), .rst(Debounce_KEY0), .outclk_0(PLL_25_CLK));
+
+// Resets buttons
+debounce d0(
+  .clk(FPGA_CLK2_50), 		
+  .reset_n(1'b1), 
+  .idebounce(KEY[0]),
+  .odebounce(Debounce_KEY0)  
+);
+
+
+debounce d1(
+  .clk(FPGA_CLK2_50), 		
+  .reset_n(1'b1), 
+  .idebounce(KEY[1]),
+  .odebounce(Debounce_KEY1)  
+);
+
+
+//=======================================================
+//  DDR3 : REG/WIRE declarations
+//=======================================================
+
+wire         ddr3_avl_wait;                  //             .avl.waitrequest
+wire [27:0]  ddr3_avl_addr;                   //             .address
+wire         ddr3_avl_rdata_valid;            //             .readdatavalid
+wire [31:0]  ddr3_avl_rdata;                  //             .readdata
+wire [31:0]  ddr3_avl_wdata;                  //             .writedata
+wire         ddr3_avl_read_req;               //             .read
+wire         ddr3_avl_write_req;              //             .write
+wire         ddr3_avl_size;                   //             .burstcount
+
+//=======================================================
+//  DDR3 : Structural coding
+//=======================================================
+
+// [Testing]
+reg  [27:0]  cpu_addr      = 26'b0;
+reg          cpu_write_req = 1'b1;
+reg  [31:0]  cpu_data_in   = 32'hA;
+reg          cpu_read_req  = 1'b0;
+wire [31:0]  cpu_data_out;
+wire op_status;
+
+mem_management_unit mem_mangt(
+    .iCLK(DDR3_CLK),
+    .iRST_n(Debounce_KEY0),
+
+    // avalon interface
+    .avl_wait(ddr3_avl_wait),
+    .avl_rData_valid(ddr3_avl_rdata_valid),                 
+    .avl_rData(ddr3_avl_rdata),                      
+    .avl_wData(ddr3_avl_wdata),                     
+    .avl_addr(ddr3_avl_addr),                      
+    .avl_read(ddr3_avl_read_req),                          
+    .avl_write(ddr3_avl_write_req),    
+    .avl_size(ddr3_avl_size),
+
+    // cpu interface
+    .cpu_addr(cpu_addr),
+    .cpu_write_req(cpu_write_req), .cpu_data_in(cpu_data_in),
+    .cpu_read_req(cpu_read_req), .cpu_data_out(cpu_data_out),
+    
+    .op_status(op_status)
+);
+
+
+// reg         write_done   = 0;
+// reg         read_done    = 0;
+// reg         op_status    = 0;   
+
+
+assign    LED[0] = cpu_data_out[0];
+assign    LED[1] = cpu_data_out[1];
+assign    LED[2] = cpu_data_out[2];
+assign    LED[3] = cpu_data_out[3];
+assign    LED[6] = op_status;
+// assign    LED[5] = read_done;
+// assign    LED[6] = write_done;
 
 //=======================================================
 //  CPU : REG/WIRE declarations
@@ -135,20 +215,20 @@ reg [31:0] wb_data;
 
 
 // CPU
-CPU_pipelined cpu (.pc_clk(), .clk(FPGA_CLK1_50), .WB_ALUout(wb_data));
+// CPU_pipelined cpu (.pc_clk(PLL_25_CLK), .clk(FPGA_CLK1_50), .WB_ALUout(wb_data));
 
 // Blick the LED[7]
 always @ (posedge FPGA_CLK2_50) heart_beat <= heart_beat + 1;
 assign LED[7] =  heart_beat[23];
 
 // For testing
-assign LED[0] = wb_data[0];
-assign LED[1] = wb_data[1];
-assign LED[2] = wb_data[2];
-assign LED[3] = wb_data[3];
-assign LED[4] = wb_data[4];
-assign LED[5] = wb_data[5];
-assign LED[6] = wb_data[6];
+// assign LED[0] = wb_data[0];
+// assign LED[1] = wb_data[1];
+// assign LED[2] = wb_data[2];
+// assign LED[3] = wb_data[3];
+// assign LED[4] = wb_data[4];
+// assign LED[5] = wb_data[5];
+// assign LED[6] = wb_data[6];
 //assign LED[7] = wb_data[7];
 
 
