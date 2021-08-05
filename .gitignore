@@ -18,3 +18,6 @@
 !/module_symbols/*
 !/ip
 !/ip/**
+!/soc_system
+!/soc_system/**
+

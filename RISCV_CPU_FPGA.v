@@ -153,18 +153,12 @@ wire [31:0]  ddr3_avl_wdata;                  //             .writedata
 wire         ddr3_avl_read_req;               //             .read
 wire         ddr3_avl_write_req;              //             .write
 wire         ddr3_avl_size;                   //             .burstcount
+wire op_status;
 
 //=======================================================
 //  DDR3 : Structural coding
 //=======================================================
 
-// [Testing]
-reg  [27:0]  cpu_addr      = 26'b0;
-reg          cpu_write_req = 1'b1;
-reg  [31:0]  cpu_data_in   = 32'hA;
-reg          cpu_read_req  = 1'b0;
-wire [31:0]  cpu_data_out;
-wire op_status;
 
 mem_management_unit mem_mangt(
     .iCLK(DDR3_CLK),
@@ -182,55 +176,46 @@ mem_management_unit mem_mangt(
 
     // cpu interface
     .cpu_addr(cpu_addr),
-    .cpu_write_req(cpu_write_req), .cpu_data_in(cpu_data_in),
-    .cpu_read_req(cpu_read_req), .cpu_data_out(cpu_data_out),
+    .cpu_write_req(cpu_MemWrite), 
+    .cpu_data_in(cpu_data_in),
+    .cpu_read_req(cpu_MemRead), 
+    .cpu_data_out(cpu_data_out),
     
     .op_status(op_status)
 );
 
-
-// reg         write_done   = 0;
-// reg         read_done    = 0;
-// reg         op_status    = 0;   
-
-
-assign    LED[0] = cpu_data_out[0];
-assign    LED[1] = cpu_data_out[1];
-assign    LED[2] = cpu_data_out[2];
-assign    LED[3] = cpu_data_out[3];
 assign    LED[6] = op_status;
-// assign    LED[5] = read_done;
-// assign    LED[6] = write_done;
 
 //=======================================================
 //  CPU : REG/WIRE declarations
 //=======================================================
 
-reg [23:0] heart_beat;
-reg [31:0] wb_data;
+wire [27:0] cpu_addr;
+wire [31:0] cpu_data_out;
+wire [31:0] cpu_data_in;
+wire cpu_MemWrite;
+wire cpu_MemRead;
+
+reg  [23:0] heart_beat;
 
 //=======================================================
 //  CPU : Structural coding
 //=======================================================
 
+CPU_pipelined cpu (
+    .pc_clk(PLL_25_CLK), 
+    .clk(FPGA_CLK1_50), 
 
-// CPU
-// CPU_pipelined cpu (.pc_clk(PLL_25_CLK), .clk(FPGA_CLK1_50), .WB_ALUout(wb_data));
+    .WB_ALUout(wb_data),
+    .addr(cpu_addr),
+    .data_out(cpu_data_out),
+    .MemWrite(cpu_MemWrite),
+    .MemRead(cpu_MemRead),
+    .data_in(cpu_data_in)
+);
 
 // Blick the LED[7]
 always @ (posedge FPGA_CLK2_50) heart_beat <= heart_beat + 1;
 assign LED[7] =  heart_beat[23];
-
-// For testing
-// assign LED[0] = wb_data[0];
-// assign LED[1] = wb_data[1];
-// assign LED[2] = wb_data[2];
-// assign LED[3] = wb_data[3];
-// assign LED[4] = wb_data[4];
-// assign LED[5] = wb_data[5];
-// assign LED[6] = wb_data[6];
-//assign LED[7] = wb_data[7];
-
-
 
 endmodule

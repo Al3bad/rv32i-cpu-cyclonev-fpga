@@ -1,7 +1,7 @@
 
 module RISCV_Control_Unit (
     input [6:0] opcode,
-    output reg RegWrite, MemRead, MemWrite, ALUSrc,
+    output reg RegWrite, MemToReg, MemRead, MemWrite, ALUSrc,
     output reg [1:0] ALUOp
 );
 
@@ -16,36 +16,18 @@ localparam jumpInst             = 7'b1101111;
 localparam jumpRegInst          = 7'b1100111;
  
 always @(opcode) begin
-    //{Branch, RegWrite, MemRead, MemWrite, ALUSrc} = 1'b0;
-	RegWrite   = 1'b0;
-	MemRead    = 1'b0;
-	MemWrite   = 1'b0;
-	ALUSrc     = 1'b0;
-	ALUOp      = 2'b00;
+    ALUSrc   = (opcode == loadInst || opcode == storeInst || opcode == immArithmeticInst)? 1'b1 : 1'b0;
+    MemToReg = (opcode == loadInst) ? 1'b1 : 1'b0;
+    MemRead  = (opcode == loadInst) ? 1'b1 : 1'b0;
+    MemWrite = (opcode == storeInst)? 1'b1 : 1'b0;
 
-    if(opcode == arithmeticInst)
-        ALUOp = 2'b00;
+    ALUOp    = (opcode == brachInst)                                     ? 2'b01 : 
+               (opcode == loadInst || opcode == storeInst)               ? 2'b10 : 
+               (opcode == arithmeticInst || opcode == immArithmeticInst) ? 2'b00 : 2'b00;
 
-    if(opcode == brachInst) begin
-        // Branch = 1'b1;
-        ALUOp = 2'b01;
-    end
-
-    if(opcode == loadInst || opcode == storeInst)
-        ALUOp = 2'b10;
-
-    if (opcode == immArithmeticInst) begin
-        ALUSrc = 1'b1;
-        ALUOp = 2'b00;
-    end
-
-    // if (opcode == jumpInst)
-    //     Jump = 1'b1;
-
-    if (opcode == arithmeticInst   || opcode == immArithmeticInst || 
-        opcode == loadUpperImmInst || opcode == addUpperImmInst   ||
-        opcode == jumpInst         || opcode == jumpRegInst)
-        RegWrite = 1'b1;
+    RegWrite = (opcode == arithmeticInst   || opcode == immArithmeticInst || 
+                opcode == loadUpperImmInst || opcode == addUpperImmInst   ||
+                opcode == jumpInst         || opcode == jumpRegInst) ? 1'b1 : 1'b0;
 
 end
     
