@@ -1,4 +1,4 @@
-module mem_management_unit # (
+module mem_interface # (
     // parameters
     ADDR_W = 28,
     DATA_W = 32

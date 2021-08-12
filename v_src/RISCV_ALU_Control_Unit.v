@@ -3,7 +3,7 @@ module RISCV_ALU_Control_Unit (
     input [2:0] func3, // from instruction
     input func7,        // from instruction
 
-    output reg [3:0] ALUctrl
+    output [3:0] ALUctrl
 );
 
 wire [3:0] RTYPE;
@@ -17,11 +17,6 @@ localparam BTYPE_OP = 2'b01;    // Branch instruction
 localparam L_OP     = 2'b10;    // Load instruction
 localparam S_OP     = 2'b10;    // Store instruction
 
-always @(ALUOp, func3, func7, RTYPE) begin
-    ALUctrl = 4'b0000;
-    if (ALUOp == RTYPE_OP) ALUctrl = RTYPE;
-    else if (ALUOp == BTYPE_OP) ALUctrl = SUB;
-    else if ((ALUOp == L_OP) || (ALUOp == S_OP)) ALUctrl = ADD;
-end
+assign ALUctrl = (ALUOp === RTYPE_OP)? RTYPE : (ALUOp === BTYPE_OP)? SUB : ADD;
     
 endmodule

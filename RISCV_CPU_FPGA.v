@@ -160,7 +160,7 @@ wire op_status;
 //=======================================================
 
 
-mem_management_unit mem_mangt(
+mem_interface m0 (
     .iCLK(DDR3_CLK),
     .iRST_n(Debounce_KEY0),
 

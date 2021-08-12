@@ -1,0 +1,71 @@
+# # File gsaved with Nlview version 6.3.8  2013-12-19 bk=1.2992 VDI=34 GEI=35
+# 
+preplace inst terasic_hps_ddr3.hps.dcan0 -pg 1
+preplace inst terasic_hps_ddr3.hps.spim0 -pg 1
+preplace inst terasic_hps_ddr3.hps.timer0 -pg 1
+preplace inst terasic_hps_ddr3.clk_50 -pg 1 -lvl 4 -y 40
+preplace inst terasic_hps_ddr3.address_span_extender_0 -pg 1 -lvl 2 -y 170
+preplace inst terasic_hps_ddr3.hps.l3regs -pg 1
+preplace inst terasic_hps_ddr3.hps.dcan1 -pg 1
+preplace inst terasic_hps_ddr3.hps.spim1 -pg 1
+preplace inst terasic_hps_ddr3.hps.timer1 -pg 1
+preplace inst terasic_hps_ddr3.hps_reset_manager_0 -pg 1 -lvl 2 -y 90
+preplace inst terasic_hps_ddr3.hps.timer2 -pg 1
+preplace inst terasic_hps_ddr3.hps.clkmgr -pg 1
+preplace inst terasic_hps_ddr3.hps.dma -pg 1
+preplace inst terasic_hps_ddr3.hps.arm_gic_0 -pg 1
+preplace inst terasic_hps_ddr3.hps.axi_sdram -pg 1
+preplace inst terasic_hps_ddr3.hps.gmac0 -pg 1
+preplace inst terasic_hps_ddr3.hps.qspi -pg 1
+preplace inst terasic_hps_ddr3.hps.i2c0 -pg 1
+preplace inst terasic_hps_ddr3.hps.wd_timer0 -pg 1
+preplace inst terasic_hps_ddr3.hps.timer3 -pg 1
+preplace inst terasic_hps_ddr3.hps.sysmgr -pg 1
+preplace inst terasic_hps_ddr3.hps.scu -pg 1
+preplace inst terasic_hps_ddr3.hps.gmac1 -pg 1
+preplace inst terasic_hps_ddr3.hps.i2c1 -pg 1
+preplace inst terasic_hps_ddr3.hps.wd_timer1 -pg 1
+preplace inst terasic_hps_ddr3.hps.i2c2 -pg 1
+preplace inst terasic_hps_ddr3.hps.gpio0 -pg 1
+preplace inst terasic_hps_ddr3.hps.uart0 -pg 1
+preplace inst terasic_hps_ddr3.hps.fpga_interfaces -pg 1
+preplace inst terasic_hps_ddr3.hps.sdrctl -pg 1
+preplace inst terasic_hps_ddr3.hps.i2c3 -pg 1
+preplace inst terasic_hps_ddr3.hps.gpio1 -pg 1
+preplace inst terasic_hps_ddr3.hps.uart1 -pg 1
+preplace inst terasic_hps_ddr3.hps.sdmmc -pg 1
+preplace inst terasic_hps_ddr3.hps.gpio2 -pg 1
+preplace inst terasic_hps_ddr3.hps.fpgamgr -pg 1
+preplace inst terasic_hps_ddr3.hps.f2s_sdram_ref_clk -pg 1
+preplace inst terasic_hps_ddr3.clock_bridge_0 -pg 1 -lvl 1 -y 170
+preplace inst terasic_hps_ddr3.hps.eosc1 -pg 1
+preplace inst terasic_hps_ddr3.hps.clk_0 -pg 1
+preplace inst terasic_hps_ddr3 -pg 1 -lvl 1 -y 40 -regy -20
+preplace inst terasic_hps_ddr3.hps.rstmgr -pg 1
+preplace inst terasic_hps_ddr3.hps.L2 -pg 1
+preplace inst terasic_hps_ddr3.hps.arm_a9_0 -pg 1
+preplace inst terasic_hps_ddr3.hps.f2s_periph_ref_clk -pg 1
+preplace inst terasic_hps_ddr3.hps.eosc2 -pg 1
+preplace inst terasic_hps_ddr3.hps.bridges -pg 1
+preplace inst terasic_hps_ddr3.hps.axi_ocram -pg 1
+preplace inst terasic_hps_ddr3.hps.arm_a9_1 -pg 1
+preplace inst terasic_hps_ddr3.hps.hps_io.border -pg 1
+preplace inst terasic_hps_ddr3.hps.timer -pg 1
+preplace inst terasic_hps_ddr3.hps.usb0 -pg 1
+preplace inst terasic_hps_ddr3.hps -pg 1 -lvl 3 -y 130
+preplace inst terasic_hps_ddr3.hps.usb1 -pg 1
+preplace inst terasic_hps_ddr3.hps.nand0 -pg 1
+preplace inst terasic_hps_ddr3.hps.hps_io -pg 1
+preplace netloc POINT_TO_POINT<net_container>terasic_hps_ddr3</net_container>(MASTER)hps_reset_manager_0.hps_warm_reset,(SLAVE)hps.f2h_warm_reset_req) 1 2 1 620
+preplace netloc POINT_TO_POINT<net_container>terasic_hps_ddr3</net_container>(SLAVE)hps.f2h_cold_reset_req,(MASTER)hps_reset_manager_0.hps_cold_reset) 1 2 1 640
+preplace netloc POINT_TO_POINT<net_container>terasic_hps_ddr3</net_container>(SLAVE)hps_reset_manager_0.clock,(MASTER)clk_50.clk) 1 1 4 350 80 NJ 80 NJ 30 1150
+preplace netloc EXPORT<net_container>terasic_hps_ddr3</net_container>(MASTER)clk_50.clk_reset,(MASTER)terasic_hps_ddr3.h2f_reset) 1 4 1 N
+preplace netloc EXPORT<net_container>terasic_hps_ddr3</net_container>(SLAVE)address_span_extender_0.windowed_slave,(SLAVE)terasic_hps_ddr3.hps_f2h_sdram0_data) 1 0 2 NJ 220 NJ
+preplace netloc EXPORT<net_container>terasic_hps_ddr3</net_container>(SLAVE)terasic_hps_ddr3.clk,(SLAVE)clk_50.clk_in) 1 0 4 NJ 40 NJ 40 NJ 40 NJ
+preplace netloc EXPORT<net_container>terasic_hps_ddr3</net_container>(SLAVE)clock_bridge_0.in_clk,(SLAVE)terasic_hps_ddr3.hps_f2h_sdram0_clock) 1 0 1 NJ
+preplace netloc POINT_TO_POINT<net_container>terasic_hps_ddr3</net_container>(MASTER)address_span_extender_0.expanded_master,(SLAVE)hps.f2h_sdram0_data) 1 2 1 600
+preplace netloc EXPORT<net_container>terasic_hps_ddr3</net_container>(SLAVE)terasic_hps_ddr3.memory,(SLAVE)hps.memory) 1 0 3 NJ 260 NJ 260 NJ
+preplace netloc FAN_OUT<net_container>terasic_hps_ddr3</net_container>(SLAVE)address_span_extender_0.clock,(MASTER)clock_bridge_0.out_clk,(SLAVE)hps.f2h_sdram0_clock) 1 1 2 310 160 NJ
+preplace netloc FAN_OUT<net_container>terasic_hps_ddr3</net_container>(SLAVE)clk_50.clk_in_reset,(SLAVE)address_span_extender_0.reset,(MASTER)hps.h2f_reset,(SLAVE)hps_reset_manager_0.hps_fpga_reset) 1 1 3 330 60 NJ 60 910
+levelinfo -pg 1 0 140 1260
+levelinfo -hier terasic_hps_ddr3 150 180 380 770 980 1170

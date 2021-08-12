@@ -1,8 +1,8 @@
 
 module RISCV_Control_Unit (
     input [6:0] opcode,
-    output reg RegWrite, MemToReg, MemRead, MemWrite, ALUSrc,
-    output reg [1:0] ALUOp
+    output RegWrite, MemToReg, MemRead, MemWrite, ALUSrc,
+    output [1:0] ALUOp
 );
 
 localparam brachInst            = 7'b1100011;
@@ -15,20 +15,19 @@ localparam addUpperImmInst      = 7'b0010111;
 localparam jumpInst             = 7'b1101111;
 localparam jumpRegInst          = 7'b1100111;
  
-always @(opcode) begin
-    ALUSrc   = (opcode == loadInst || opcode == storeInst || opcode == immArithmeticInst)? 1'b1 : 1'b0;
-    MemToReg = (opcode == loadInst) ? 1'b1 : 1'b0;
-    MemRead  = (opcode == loadInst) ? 1'b1 : 1'b0;
-    MemWrite = (opcode == storeInst)? 1'b1 : 1'b0;
 
-    ALUOp    = (opcode == brachInst)                                     ? 2'b01 : 
-               (opcode == loadInst || opcode == storeInst)               ? 2'b10 : 
-               (opcode == arithmeticInst || opcode == immArithmeticInst) ? 2'b00 : 2'b00;
+assign ALUSrc   = (opcode == loadInst || opcode == storeInst || opcode == immArithmeticInst)? 1'b1 : 1'b0;
+assign MemToReg = (opcode == loadInst) ? 1'b1 : 1'b0;
+assign MemRead  = (opcode == loadInst) ? 1'b1 : 1'b0;
+assign MemWrite = (opcode == storeInst)? 1'b1 : 1'b0;
 
-    RegWrite = (opcode == arithmeticInst   || opcode == immArithmeticInst || 
+assign ALUOp = (opcode === arithmeticInst)    ? 2'b00 :
+			   (opcode === immArithmeticInst) ? 2'b00 :
+               (opcode === brachInst)         ? 2'b01 : 2'b10;
+
+assign RegWrite = (opcode == arithmeticInst   || opcode == immArithmeticInst || 
                 opcode == loadUpperImmInst || opcode == addUpperImmInst   ||
                 opcode == jumpInst         || opcode == jumpRegInst) ? 1'b1 : 1'b0;
 
-end
-    
+
 endmodule

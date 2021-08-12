@@ -4,7 +4,7 @@ module RISCV_Inst_Decoder (
     output reg [4:0] rd, rs1, rs2,
     output reg [2:0] func3,
     output reg func7,
-	 output reg [6:0] opcode
+	output reg [6:0] opcode
 );
 
 always @(inst) begin
@@ -13,7 +13,7 @@ always @(inst) begin
     rs2 = inst[24:20];
     func3 = inst[14:12];
     func7 = inst[30];
-	 opcode = inst[6:0];
+	opcode = inst[6:0];
 end
 
     
