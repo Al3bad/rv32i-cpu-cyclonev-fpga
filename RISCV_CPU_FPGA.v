@@ -159,6 +159,24 @@ wire op_status;
 //  DDR3 : Structural coding
 //=======================================================
 
+/*
+    Address space = 2^27
+    RAM  = 0        --> 2^27 - 8
+    LEDs = 2^27 - 8 --> 2^27
+*/
+
+reg [32:0] LED_REG;
+assign LED[5:0] = LED_REG[5:0];
+
+always @(posedge FPGA_CLK1_50) begin
+    // LED_REG <= 7'b0001010;
+    if (cpu_addr == 32'hBBB332E)
+        if (cpu_MemWrite) begin
+            LED_REG <= cpu_data_out;
+            // LED_REG[5] = 1'b1;
+        end
+        // else if (cpu_MemRead) cpu_data_out <= LED_REG;
+end
 
 mem_interface m0 (
     .iCLK(DDR3_CLK),
@@ -176,9 +194,9 @@ mem_interface m0 (
 
     // cpu interface
     .cpu_addr(cpu_addr),
-    .cpu_write_req(cpu_MemWrite), 
+    .cpu_MemWrite(cpu_MemWrite), 
     .cpu_data_in(cpu_data_in),
-    .cpu_read_req(cpu_MemRead), 
+    .cpu_MemRead(cpu_MemRead), 
     .cpu_data_out(cpu_data_out),
     
     .op_status(op_status)
