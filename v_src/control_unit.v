@@ -9,7 +9,7 @@ module control_unit (
 
 wire [1:0] ALUOp_wire; // used to connect output from control unit to input of ALU control unit
 
-RISCV_Hazard_Detection_Unit hzard_detection (.zero(zero), .lessThan(lessThan),
+RISCV_Branch_Predictor branch_predictor (.zero(zero), .lessThan(lessThan),
                                              .opcode(opcode), .func3(func3),
                                              .flush(flush), .pcSrc(pcSrc));
 

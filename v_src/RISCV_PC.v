@@ -9,7 +9,7 @@
 module RISCV_PC (
     input clk, pcSrc, pcEn,
     input [31:0] offset,
-
+    input [7:0] prevPC,
     output reg [7:0] pcOutput
 );
 
@@ -21,7 +21,7 @@ always @(posedge clk ) begin
     if(^pcOutput === 1'bx || ^pcOutput === 1'bz ) pcOutput <= 32'h00;
     else begin
         if (pcEn) begin
-            pcOutput <= pcSrc? (pcOutput + (offset /INSTRUCTION_WIDTH)) : (pcOutput + (INC_BY / INSTRUCTION_WIDTH));
+            pcOutput <= pcSrc? (prevPC + (offset /INSTRUCTION_WIDTH)) : (pcOutput + (INC_BY / INSTRUCTION_WIDTH));
         end
     end
 end

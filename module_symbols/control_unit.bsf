@@ -46,18 +46,18 @@ https://fpgasoftware.intel.com/eula.
 		(line (pt 48 0)(pt 48 16))
 	)
 	(port
-		(pt 176 0)
-		(input)
-		(text "zero" (rect 0 0 20 12)(font "Arial" ))
-		(text "zero" (rect 168 25 180 45)(font "Arial" )(vertical))
-		(line (pt 176 0)(pt 176 17))
-	)
-	(port
 		(pt 160 0)
 		(input)
-		(text "lessThan" (rect 0 0 43 12)(font "Arial" ))
-		(text "lessThan" (rect 152 25 164 68)(font "Arial" )(vertical))
+		(text "zero" (rect 0 0 20 12)(font "Arial" ))
+		(text "zero" (rect 152 25 164 45)(font "Arial" )(vertical))
 		(line (pt 160 0)(pt 160 16))
+	)
+	(port
+		(pt 176 0)
+		(input)
+		(text "lessThan" (rect 0 0 43 12)(font "Arial" ))
+		(text "lessThan" (rect 168 25 180 68)(font "Arial" )(vertical))
+		(line (pt 176 0)(pt 176 16))
 	)
 	(port
 		(pt 104 0)

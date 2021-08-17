@@ -171,6 +171,7 @@ assign LED[5:0] = LED_REG[5:0];
 always @(posedge FPGA_CLK1_50) begin
     // LED_REG <= 7'b0001010;
     if (cpu_addr == 32'hBBB332E)
+    // if (cpu_addr == 27'hBBB3338)
         if (cpu_MemWrite) begin
             LED_REG <= cpu_data_out;
             // LED_REG[5] = 1'b1;
@@ -221,8 +222,8 @@ reg  [23:0] heart_beat;
 //=======================================================
 
 CPU_pipelined cpu (
-    .pc_clk(PLL_25_CLK), 
     .clk(FPGA_CLK1_50), 
+    .rom_clk(PLL_25_CLK), 
 
     .WB_ALUout(wb_data),
     .addr(cpu_addr),

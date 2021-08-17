@@ -1,6 +1,6 @@
 
 
-module RISCV_Hazard_Detection_Unit (
+module RISCV_Branch_Predictor (
     input zero, lessThan,
     input [6:0] opcode, 
     input [2:0] func3,

@@ -9,6 +9,7 @@
 !CPU_pipelined.bdf
 !soc_system.qsys
 !syn.sh
+!*.qsf
 
 !/v_src
 !/v_src/*.v
