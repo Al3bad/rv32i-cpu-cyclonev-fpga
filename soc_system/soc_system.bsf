@@ -41,8 +41,8 @@ https://fpgasoftware.intel.com/eula.
 	(port
 		(pt 0 152)
 		(input)
-		(text "ddr3_hps_f2h_sdram0_data_address[27..0]" (rect 0 0 178 12)(font "Arial" (font_size 8)))
-		(text "ddr3_hps_f2h_sdram0_data_address[27..0]" (rect 4 141 238 152)(font "Arial" (font_size 8)))
+		(text "ddr3_hps_f2h_sdram0_data_address[25..0]" (rect 0 0 178 12)(font "Arial" (font_size 8)))
+		(text "ddr3_hps_f2h_sdram0_data_address[25..0]" (rect 4 141 238 152)(font "Arial" (font_size 8)))
 		(line (pt 0 152)(pt 240 152)(line_width 3))
 	)
 	(port
@@ -62,23 +62,23 @@ https://fpgasoftware.intel.com/eula.
 	(port
 		(pt 0 216)
 		(input)
-		(text "ddr3_hps_f2h_sdram0_data_writedata[31..0]" (rect 0 0 179 12)(font "Arial" (font_size 8)))
-		(text "ddr3_hps_f2h_sdram0_data_writedata[31..0]" (rect 4 205 250 216)(font "Arial" (font_size 8)))
+		(text "ddr3_hps_f2h_sdram0_data_writedata[127..0]" (rect 0 0 184 12)(font "Arial" (font_size 8)))
+		(text "ddr3_hps_f2h_sdram0_data_writedata[127..0]" (rect 4 205 256 216)(font "Arial" (font_size 8)))
 		(line (pt 0 216)(pt 240 216)(line_width 3))
 	)
 	(port
 		(pt 0 264)
 		(input)
-		(text "ddr3_hps_f2h_sdram0_data_byteenable[3..0]" (rect 0 0 184 12)(font "Arial" (font_size 8)))
-		(text "ddr3_hps_f2h_sdram0_data_byteenable[3..0]" (rect 4 253 250 264)(font "Arial" (font_size 8)))
+		(text "ddr3_hps_f2h_sdram0_data_byteenable[15..0]" (rect 0 0 187 12)(font "Arial" (font_size 8)))
+		(text "ddr3_hps_f2h_sdram0_data_byteenable[15..0]" (rect 4 253 256 264)(font "Arial" (font_size 8)))
 		(line (pt 0 264)(pt 240 264)(line_width 3))
 	)
 	(port
 		(pt 0 280)
 		(input)
-		(text "ddr3_hps_f2h_sdram0_data_burstcount" (rect 0 0 162 12)(font "Arial" (font_size 8)))
-		(text "ddr3_hps_f2h_sdram0_data_burstcount" (rect 4 269 214 280)(font "Arial" (font_size 8)))
-		(line (pt 0 280)(pt 240 280)(line_width 1))
+		(text "ddr3_hps_f2h_sdram0_data_burstcount[8..0]" (rect 0 0 182 12)(font "Arial" (font_size 8)))
+		(text "ddr3_hps_f2h_sdram0_data_burstcount[8..0]" (rect 4 269 250 280)(font "Arial" (font_size 8)))
+		(line (pt 0 280)(pt 240 280)(line_width 3))
 	)
 	(port
 		(pt 624 352)
@@ -97,8 +97,8 @@ https://fpgasoftware.intel.com/eula.
 	(port
 		(pt 0 184)
 		(output)
-		(text "ddr3_hps_f2h_sdram0_data_readdata[31..0]" (rect 0 0 179 12)(font "Arial" (font_size 8)))
-		(text "ddr3_hps_f2h_sdram0_data_readdata[31..0]" (rect 4 173 244 184)(font "Arial" (font_size 8)))
+		(text "ddr3_hps_f2h_sdram0_data_readdata[127..0]" (rect 0 0 184 12)(font "Arial" (font_size 8)))
+		(text "ddr3_hps_f2h_sdram0_data_readdata[127..0]" (rect 4 173 250 184)(font "Arial" (font_size 8)))
 		(line (pt 0 184)(pt 240 184)(line_width 3))
 	)
 	(port

@@ -25,9 +25,10 @@ assign ALUOp = (opcode === arithmeticInst)    ? 2'b00 :
 			   (opcode === immArithmeticInst) ? 2'b00 :
                (opcode === brachInst)         ? 2'b01 : 2'b10;
 
-assign RegWrite = (opcode == arithmeticInst   || opcode == immArithmeticInst || 
-                opcode == loadUpperImmInst || opcode == addUpperImmInst   ||
-                opcode == jumpInst         || opcode == jumpRegInst) ? 1'b1 : 1'b0;
+assign RegWrite = (opcode == arithmeticInst    || opcode == immArithmeticInst || 
+                   opcode == loadUpperImmInst  || opcode == addUpperImmInst   ||
+                   opcode == jumpInst          || opcode == jumpRegInst       ||
+                   opcode == loadInst) ? 1'b1 : 1'b0;
 
 
 endmodule

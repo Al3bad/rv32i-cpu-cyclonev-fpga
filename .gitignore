@@ -8,7 +8,8 @@
 !CPU.bdf
 !CPU_pipelined.bdf
 !soc_system.qsys
-!syn.sh
+!assemble-inst.sh
+!code.s
 !*.qsf
 
 !/v_src

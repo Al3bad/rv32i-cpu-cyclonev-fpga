@@ -4,66 +4,66 @@
 
 `timescale 1 ps / 1 ps
 module soc_system_ddr3 (
-		input  wire        clk_clk,                           //                  clk.clk
-		output wire        h2f_reset_reset_n,                 //            h2f_reset.reset_n
-		input  wire        hps_f2h_sdram0_clock_clk,          // hps_f2h_sdram0_clock.clk
-		input  wire [27:0] hps_f2h_sdram0_data_address,       //  hps_f2h_sdram0_data.address
-		input  wire        hps_f2h_sdram0_data_read,          //                     .read
-		output wire [31:0] hps_f2h_sdram0_data_readdata,      //                     .readdata
-		input  wire        hps_f2h_sdram0_data_write,         //                     .write
-		input  wire [31:0] hps_f2h_sdram0_data_writedata,     //                     .writedata
-		output wire        hps_f2h_sdram0_data_readdatavalid, //                     .readdatavalid
-		output wire        hps_f2h_sdram0_data_waitrequest,   //                     .waitrequest
-		input  wire [3:0]  hps_f2h_sdram0_data_byteenable,    //                     .byteenable
-		input  wire [0:0]  hps_f2h_sdram0_data_burstcount,    //                     .burstcount
-		output wire [14:0] memory_mem_a,                      //               memory.mem_a
-		output wire [2:0]  memory_mem_ba,                     //                     .mem_ba
-		output wire        memory_mem_ck,                     //                     .mem_ck
-		output wire        memory_mem_ck_n,                   //                     .mem_ck_n
-		output wire        memory_mem_cke,                    //                     .mem_cke
-		output wire        memory_mem_cs_n,                   //                     .mem_cs_n
-		output wire        memory_mem_ras_n,                  //                     .mem_ras_n
-		output wire        memory_mem_cas_n,                  //                     .mem_cas_n
-		output wire        memory_mem_we_n,                   //                     .mem_we_n
-		output wire        memory_mem_reset_n,                //                     .mem_reset_n
-		inout  wire [31:0] memory_mem_dq,                     //                     .mem_dq
-		inout  wire [3:0]  memory_mem_dqs,                    //                     .mem_dqs
-		inout  wire [3:0]  memory_mem_dqs_n,                  //                     .mem_dqs_n
-		output wire        memory_mem_odt,                    //                     .mem_odt
-		output wire [3:0]  memory_mem_dm,                     //                     .mem_dm
-		input  wire        memory_oct_rzqin                   //                     .oct_rzqin
+		input  wire         clk_clk,                           //                  clk.clk
+		output wire         h2f_reset_reset_n,                 //            h2f_reset.reset_n
+		input  wire         hps_f2h_sdram0_clock_clk,          // hps_f2h_sdram0_clock.clk
+		input  wire [25:0]  hps_f2h_sdram0_data_address,       //  hps_f2h_sdram0_data.address
+		input  wire         hps_f2h_sdram0_data_read,          //                     .read
+		output wire [127:0] hps_f2h_sdram0_data_readdata,      //                     .readdata
+		input  wire         hps_f2h_sdram0_data_write,         //                     .write
+		input  wire [127:0] hps_f2h_sdram0_data_writedata,     //                     .writedata
+		output wire         hps_f2h_sdram0_data_readdatavalid, //                     .readdatavalid
+		output wire         hps_f2h_sdram0_data_waitrequest,   //                     .waitrequest
+		input  wire [15:0]  hps_f2h_sdram0_data_byteenable,    //                     .byteenable
+		input  wire [8:0]   hps_f2h_sdram0_data_burstcount,    //                     .burstcount
+		output wire [14:0]  memory_mem_a,                      //               memory.mem_a
+		output wire [2:0]   memory_mem_ba,                     //                     .mem_ba
+		output wire         memory_mem_ck,                     //                     .mem_ck
+		output wire         memory_mem_ck_n,                   //                     .mem_ck_n
+		output wire         memory_mem_cke,                    //                     .mem_cke
+		output wire         memory_mem_cs_n,                   //                     .mem_cs_n
+		output wire         memory_mem_ras_n,                  //                     .mem_ras_n
+		output wire         memory_mem_cas_n,                  //                     .mem_cas_n
+		output wire         memory_mem_we_n,                   //                     .mem_we_n
+		output wire         memory_mem_reset_n,                //                     .mem_reset_n
+		inout  wire [31:0]  memory_mem_dq,                     //                     .mem_dq
+		inout  wire [3:0]   memory_mem_dqs,                    //                     .mem_dqs
+		inout  wire [3:0]   memory_mem_dqs_n,                  //                     .mem_dqs_n
+		output wire         memory_mem_odt,                    //                     .mem_odt
+		output wire [3:0]   memory_mem_dm,                     //                     .mem_dm
+		input  wire         memory_oct_rzqin                   //                     .oct_rzqin
 	);
 
-	wire         hps_reset_manager_0_hps_cold_reset_reset;              // hps_reset_manager_0:hps_cold_reset -> hps:f2h_cold_rst_req_n
-	wire         hps_reset_manager_0_hps_warm_reset_reset;              // hps_reset_manager_0:hps_warm_reset -> hps:f2h_warm_rst_req_n
-	wire         address_span_extender_0_expanded_master_waitrequest;   // mm_interconnect_0:address_span_extender_0_expanded_master_waitrequest -> address_span_extender_0:avm_m0_waitrequest
-	wire  [31:0] address_span_extender_0_expanded_master_readdata;      // mm_interconnect_0:address_span_extender_0_expanded_master_readdata -> address_span_extender_0:avm_m0_readdata
-	wire  [31:0] address_span_extender_0_expanded_master_address;       // address_span_extender_0:avm_m0_address -> mm_interconnect_0:address_span_extender_0_expanded_master_address
-	wire         address_span_extender_0_expanded_master_read;          // address_span_extender_0:avm_m0_read -> mm_interconnect_0:address_span_extender_0_expanded_master_read
-	wire   [3:0] address_span_extender_0_expanded_master_byteenable;    // address_span_extender_0:avm_m0_byteenable -> mm_interconnect_0:address_span_extender_0_expanded_master_byteenable
-	wire         address_span_extender_0_expanded_master_readdatavalid; // mm_interconnect_0:address_span_extender_0_expanded_master_readdatavalid -> address_span_extender_0:avm_m0_readdatavalid
-	wire         address_span_extender_0_expanded_master_write;         // address_span_extender_0:avm_m0_write -> mm_interconnect_0:address_span_extender_0_expanded_master_write
-	wire  [31:0] address_span_extender_0_expanded_master_writedata;     // address_span_extender_0:avm_m0_writedata -> mm_interconnect_0:address_span_extender_0_expanded_master_writedata
-	wire   [0:0] address_span_extender_0_expanded_master_burstcount;    // address_span_extender_0:avm_m0_burstcount -> mm_interconnect_0:address_span_extender_0_expanded_master_burstcount
-	wire  [31:0] mm_interconnect_0_hps_f2h_sdram0_data_readdata;        // hps:f2h_sdram0_READDATA -> mm_interconnect_0:hps_f2h_sdram0_data_readdata
-	wire         mm_interconnect_0_hps_f2h_sdram0_data_waitrequest;     // hps:f2h_sdram0_WAITREQUEST -> mm_interconnect_0:hps_f2h_sdram0_data_waitrequest
-	wire  [29:0] mm_interconnect_0_hps_f2h_sdram0_data_address;         // mm_interconnect_0:hps_f2h_sdram0_data_address -> hps:f2h_sdram0_ADDRESS
-	wire         mm_interconnect_0_hps_f2h_sdram0_data_read;            // mm_interconnect_0:hps_f2h_sdram0_data_read -> hps:f2h_sdram0_READ
-	wire   [3:0] mm_interconnect_0_hps_f2h_sdram0_data_byteenable;      // mm_interconnect_0:hps_f2h_sdram0_data_byteenable -> hps:f2h_sdram0_BYTEENABLE
-	wire         mm_interconnect_0_hps_f2h_sdram0_data_readdatavalid;   // hps:f2h_sdram0_READDATAVALID -> mm_interconnect_0:hps_f2h_sdram0_data_readdatavalid
-	wire         mm_interconnect_0_hps_f2h_sdram0_data_write;           // mm_interconnect_0:hps_f2h_sdram0_data_write -> hps:f2h_sdram0_WRITE
-	wire  [31:0] mm_interconnect_0_hps_f2h_sdram0_data_writedata;       // mm_interconnect_0:hps_f2h_sdram0_data_writedata -> hps:f2h_sdram0_WRITEDATA
-	wire   [7:0] mm_interconnect_0_hps_f2h_sdram0_data_burstcount;      // mm_interconnect_0:hps_f2h_sdram0_data_burstcount -> hps:f2h_sdram0_BURSTCOUNT
-	wire         rst_controller_reset_out_reset;                        // rst_controller:reset_out -> [address_span_extender_0:reset, mm_interconnect_0:address_span_extender_0_reset_reset_bridge_in_reset_reset]
-	wire         rst_controller_001_reset_out_reset;                    // rst_controller_001:reset_out -> hps_reset_manager_0:hps_fpga_reset_n
+	wire          hps_reset_manager_0_hps_cold_reset_reset;              // hps_reset_manager_0:hps_cold_reset -> hps:f2h_cold_rst_req_n
+	wire          hps_reset_manager_0_hps_warm_reset_reset;              // hps_reset_manager_0:hps_warm_reset -> hps:f2h_warm_rst_req_n
+	wire          address_span_extender_0_expanded_master_waitrequest;   // mm_interconnect_0:address_span_extender_0_expanded_master_waitrequest -> address_span_extender_0:avm_m0_waitrequest
+	wire  [127:0] address_span_extender_0_expanded_master_readdata;      // mm_interconnect_0:address_span_extender_0_expanded_master_readdata -> address_span_extender_0:avm_m0_readdata
+	wire   [31:0] address_span_extender_0_expanded_master_address;       // address_span_extender_0:avm_m0_address -> mm_interconnect_0:address_span_extender_0_expanded_master_address
+	wire          address_span_extender_0_expanded_master_read;          // address_span_extender_0:avm_m0_read -> mm_interconnect_0:address_span_extender_0_expanded_master_read
+	wire   [15:0] address_span_extender_0_expanded_master_byteenable;    // address_span_extender_0:avm_m0_byteenable -> mm_interconnect_0:address_span_extender_0_expanded_master_byteenable
+	wire          address_span_extender_0_expanded_master_readdatavalid; // mm_interconnect_0:address_span_extender_0_expanded_master_readdatavalid -> address_span_extender_0:avm_m0_readdatavalid
+	wire          address_span_extender_0_expanded_master_write;         // address_span_extender_0:avm_m0_write -> mm_interconnect_0:address_span_extender_0_expanded_master_write
+	wire  [127:0] address_span_extender_0_expanded_master_writedata;     // address_span_extender_0:avm_m0_writedata -> mm_interconnect_0:address_span_extender_0_expanded_master_writedata
+	wire    [8:0] address_span_extender_0_expanded_master_burstcount;    // address_span_extender_0:avm_m0_burstcount -> mm_interconnect_0:address_span_extender_0_expanded_master_burstcount
+	wire  [127:0] mm_interconnect_0_hps_f2h_sdram0_data_readdata;        // hps:f2h_sdram0_READDATA -> mm_interconnect_0:hps_f2h_sdram0_data_readdata
+	wire          mm_interconnect_0_hps_f2h_sdram0_data_waitrequest;     // hps:f2h_sdram0_WAITREQUEST -> mm_interconnect_0:hps_f2h_sdram0_data_waitrequest
+	wire   [27:0] mm_interconnect_0_hps_f2h_sdram0_data_address;         // mm_interconnect_0:hps_f2h_sdram0_data_address -> hps:f2h_sdram0_ADDRESS
+	wire          mm_interconnect_0_hps_f2h_sdram0_data_read;            // mm_interconnect_0:hps_f2h_sdram0_data_read -> hps:f2h_sdram0_READ
+	wire   [15:0] mm_interconnect_0_hps_f2h_sdram0_data_byteenable;      // mm_interconnect_0:hps_f2h_sdram0_data_byteenable -> hps:f2h_sdram0_BYTEENABLE
+	wire          mm_interconnect_0_hps_f2h_sdram0_data_readdatavalid;   // hps:f2h_sdram0_READDATAVALID -> mm_interconnect_0:hps_f2h_sdram0_data_readdatavalid
+	wire          mm_interconnect_0_hps_f2h_sdram0_data_write;           // mm_interconnect_0:hps_f2h_sdram0_data_write -> hps:f2h_sdram0_WRITE
+	wire  [127:0] mm_interconnect_0_hps_f2h_sdram0_data_writedata;       // mm_interconnect_0:hps_f2h_sdram0_data_writedata -> hps:f2h_sdram0_WRITEDATA
+	wire    [7:0] mm_interconnect_0_hps_f2h_sdram0_data_burstcount;      // mm_interconnect_0:hps_f2h_sdram0_data_burstcount -> hps:f2h_sdram0_BURSTCOUNT
+	wire          rst_controller_reset_out_reset;                        // rst_controller:reset_out -> [address_span_extender_0:reset, mm_interconnect_0:address_span_extender_0_reset_reset_bridge_in_reset_reset]
+	wire          rst_controller_001_reset_out_reset;                    // rst_controller_001:reset_out -> hps_reset_manager_0:hps_fpga_reset_n
 
 	altera_address_span_extender #(
-		.DATA_WIDTH           (32),
-		.BYTEENABLE_WIDTH     (4),
+		.DATA_WIDTH           (128),
+		.BYTEENABLE_WIDTH     (16),
 		.MASTER_ADDRESS_WIDTH (32),
-		.SLAVE_ADDRESS_WIDTH  (28),
-		.SLAVE_ADDRESS_SHIFT  (2),
-		.BURSTCOUNT_WIDTH     (1),
+		.SLAVE_ADDRESS_WIDTH  (26),
+		.SLAVE_ADDRESS_SHIFT  (4),
+		.BURSTCOUNT_WIDTH     (9),
 		.CNTL_ADDRESS_WIDTH   (1),
 		.SUB_WINDOW_COUNT     (1),
 		.MASTER_ADDRESS_DEF   (64'b0000000000000000000000000000000000000000000000000000000000000000)

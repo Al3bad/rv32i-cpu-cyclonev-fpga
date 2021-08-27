@@ -10,35 +10,35 @@ module soc_system_ddr3_hps #(
 		parameter F2S_Width = 0,
 		parameter S2F_Width = 0
 	) (
-		output wire        h2f_rst_n,                //          h2f_reset.reset_n
-		input  wire        f2h_cold_rst_req_n,       // f2h_cold_reset_req.reset_n
-		input  wire        f2h_warm_rst_req_n,       // f2h_warm_reset_req.reset_n
-		input  wire [29:0] f2h_sdram0_ADDRESS,       //    f2h_sdram0_data.address
-		input  wire [7:0]  f2h_sdram0_BURSTCOUNT,    //                   .burstcount
-		output wire        f2h_sdram0_WAITREQUEST,   //                   .waitrequest
-		output wire [31:0] f2h_sdram0_READDATA,      //                   .readdata
-		output wire        f2h_sdram0_READDATAVALID, //                   .readdatavalid
-		input  wire        f2h_sdram0_READ,          //                   .read
-		input  wire [31:0] f2h_sdram0_WRITEDATA,     //                   .writedata
-		input  wire [3:0]  f2h_sdram0_BYTEENABLE,    //                   .byteenable
-		input  wire        f2h_sdram0_WRITE,         //                   .write
-		input  wire        f2h_sdram0_clk,           //   f2h_sdram0_clock.clk
-		output wire [14:0] mem_a,                    //             memory.mem_a
-		output wire [2:0]  mem_ba,                   //                   .mem_ba
-		output wire        mem_ck,                   //                   .mem_ck
-		output wire        mem_ck_n,                 //                   .mem_ck_n
-		output wire        mem_cke,                  //                   .mem_cke
-		output wire        mem_cs_n,                 //                   .mem_cs_n
-		output wire        mem_ras_n,                //                   .mem_ras_n
-		output wire        mem_cas_n,                //                   .mem_cas_n
-		output wire        mem_we_n,                 //                   .mem_we_n
-		output wire        mem_reset_n,              //                   .mem_reset_n
-		inout  wire [31:0] mem_dq,                   //                   .mem_dq
-		inout  wire [3:0]  mem_dqs,                  //                   .mem_dqs
-		inout  wire [3:0]  mem_dqs_n,                //                   .mem_dqs_n
-		output wire        mem_odt,                  //                   .mem_odt
-		output wire [3:0]  mem_dm,                   //                   .mem_dm
-		input  wire        oct_rzqin                 //                   .oct_rzqin
+		output wire         h2f_rst_n,                //          h2f_reset.reset_n
+		input  wire         f2h_cold_rst_req_n,       // f2h_cold_reset_req.reset_n
+		input  wire         f2h_warm_rst_req_n,       // f2h_warm_reset_req.reset_n
+		input  wire [27:0]  f2h_sdram0_ADDRESS,       //    f2h_sdram0_data.address
+		input  wire [7:0]   f2h_sdram0_BURSTCOUNT,    //                   .burstcount
+		output wire         f2h_sdram0_WAITREQUEST,   //                   .waitrequest
+		output wire [127:0] f2h_sdram0_READDATA,      //                   .readdata
+		output wire         f2h_sdram0_READDATAVALID, //                   .readdatavalid
+		input  wire         f2h_sdram0_READ,          //                   .read
+		input  wire [127:0] f2h_sdram0_WRITEDATA,     //                   .writedata
+		input  wire [15:0]  f2h_sdram0_BYTEENABLE,    //                   .byteenable
+		input  wire         f2h_sdram0_WRITE,         //                   .write
+		input  wire         f2h_sdram0_clk,           //   f2h_sdram0_clock.clk
+		output wire [14:0]  mem_a,                    //             memory.mem_a
+		output wire [2:0]   mem_ba,                   //                   .mem_ba
+		output wire         mem_ck,                   //                   .mem_ck
+		output wire         mem_ck_n,                 //                   .mem_ck_n
+		output wire         mem_cke,                  //                   .mem_cke
+		output wire         mem_cs_n,                 //                   .mem_cs_n
+		output wire         mem_ras_n,                //                   .mem_ras_n
+		output wire         mem_cas_n,                //                   .mem_cas_n
+		output wire         mem_we_n,                 //                   .mem_we_n
+		output wire         mem_reset_n,              //                   .mem_reset_n
+		inout  wire [31:0]  mem_dq,                   //                   .mem_dq
+		inout  wire [3:0]   mem_dqs,                  //                   .mem_dqs
+		inout  wire [3:0]   mem_dqs_n,                //                   .mem_dqs_n
+		output wire         mem_odt,                  //                   .mem_odt
+		output wire [3:0]   mem_dm,                   //                   .mem_dm
+		input  wire         oct_rzqin                 //                   .oct_rzqin
 	);
 
 	generate
