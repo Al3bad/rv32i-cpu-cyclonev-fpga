@@ -23,7 +23,7 @@ module mem_interface # (
     input                       cpu_MemRead,
     output   [DATA_W-1:0]    cpu_data_in,
 
-    output is_reading,
+    output data_ready,
     output reg value_received
 );
 
@@ -34,7 +34,7 @@ module mem_interface # (
 
 reg [1:0] read_state;
 
-assign is_reading = (read_state == 2'h00) ? 1'b0 : 1'b1;
+assign data_ready = (read_state == 2'h00 && cpu_MemRead) ? 1'b1 : 1'b0;
 assign cpu_data_in = avl_readdata;
 
 // Logic

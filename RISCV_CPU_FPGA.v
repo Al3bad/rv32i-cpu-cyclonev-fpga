@@ -118,7 +118,7 @@ wire cpu_pcEn;
 //  CPU : Structural coding
 //=======================================================
 
-assign cpu_pcEn = (is_reading)? 1'b0 : 1'b1;
+assign cpu_pcEn = (cache_data_ready)? 1'b1 : 1'b0;
 CPU_pipelined cpu (
     .iRST_n(Debounce_KEY0),
     .rom_clk(DDR3_CLK), 
@@ -134,21 +134,59 @@ CPU_pipelined cpu (
 );
 
 //=======================================================
+//  Cache : REG/WIRE declarations
+//=======================================================
+
+wire cpu_rw;
+wire cpu_valid;
+wire cache_data_ready;
+
+wire cache_rw;
+wire cache_valid;
+wire cache_MemRead;
+wire cache_MemWrite;
+
+//=======================================================
+//  Cache : Structural coding
+//=======================================================
+
+assign cpu_rw    = (cpu_MemWrite)?                1'b1 : 1'b0;
+assign cpu_valid = (cpu_MemWrite || cpu_MemRead)? 1'b1 : 1'b0; 
+cache_controller cc (
+        .iCLK(FPGA_CLK2_50),
+        // CPU --> Cache conterller (CPU request)
+        .cpu2cache_addr(cpu_addr),
+        .cpu2cache_rw(cpu_rw),
+        .cpu2cache_valid(cpu_valid),
+        .cpu2cache_data_in(cpu_data_out),
+        // CPU <-- Cache controller (Cache result)
+        .cache2cpu_data_out(cpu_data_in),
+        .cache2cpu_ready(cache_data_ready),
+        // Cache controller --> RAM (Memory request)
+        .cache2mem_MemWrite(cache_MemWrite),
+        .cache2mem_MemRead(cache_MemRead),
+        // Cache controller <-- RAM (Memory result)
+        .mem2cache_data_in(mem_data_out),
+        .mem2cache_ready(data_ready)
+);
+
+//=======================================================
 //  Memory Interface : REG/WIRE declarations
 //=======================================================
 
-wire [26:0]  aligned_address;
-wire         ddr3_avl_wait;             //   .avl.waitrequest
-wire [26:0]  ddr3_avl_address;          //   .address
-wire         ddr3_avl_readdatavalid;    //   .readdatavalid
-wire [127:0] ddr3_avl_readdata;         //   .readdata
-wire [127:0] ddr3_avl_writedata;        //   .writedata
-wire         ddr3_avl_read;             //   .read
-wire         ddr3_avl_write;            //   .write
-wire         data_received;
-wire         is_reading;
+wire [26:0]         aligned_address;
+wire                ddr3_avl_wait;             //   .avl.waitrequest
+wire [26:0]         ddr3_avl_address;          //   .address
+wire                ddr3_avl_readdatavalid;    //   .readdatavalid
+wire [127:0]        ddr3_avl_readdata;         //   .readdata
+wire [127:0]        ddr3_avl_writedata;        //   .writedata
+wire                ddr3_avl_read;             //   .read
+wire                ddr3_avl_write;            //   .write
+wire [DATA_W-1:0]   mem_data_out;
+wire                data_received;
+wire                data_ready;
 
-reg [7:0]   LED_REG;
+reg [7:0]           LED_REG;
 
 //=======================================================
 //  Memory Interface : Structural coding
@@ -194,11 +232,11 @@ end
         // CPU
         .cpu_addr(aligned_address),
         .cpu_data_out(cpu_data_out),      // CPU --> mem_mangt --> avl.writedata
-		.cpu_data_in(cpu_data_in),        // CPU <-- mem_mangt <-- avl.readdata
-        .cpu_MemRead(cpu_MemRead),
-        .cpu_MemWrite(cpu_MemWrite),
+		.cpu_data_in(mem_data_out),        // CPU <-- mem_mangt <-- avl.readdata
+        .cpu_MemRead(cache_MemRead),
+        .cpu_MemWrite(cache_MemWrite),
         .value_received(value_received),
-        .is_reading(is_reading)
+        .data_ready(data_ready)
 );
 
 //=======================================================
