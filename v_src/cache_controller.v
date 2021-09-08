@@ -29,21 +29,32 @@ module cache_controller # (
 
     // Cache controller <-- RAM (Memory result)
     input [DATA_W:0]    mem2cache_data_in,    // data returned to the cache controller
-    input               mem2cache_ready,
+    input               mem2cache_ready
 );
 
 // Extract the the tag & the index from the address
-assign index = cpu2cache_addr[IDX_W+OFFSET_W-1:OFFSET_W];
-assign tag = cpu2cache_addr[ADDR_W-1:IDX_W+OFFSET_W];
 wire [IDX_W-1:0]     index;
 wire [TAG_W-1:0]     tag;
+assign index = cpu2cache_addr[IDX_W+OFFSET_W-1:OFFSET_W];
+assign tag = cpu2cache_addr[ADDR_W-1:IDX_W+OFFSET_W];
 
 // Local variables
 reg                  cache_data_we;
-reg  [DATA_W-1:0]    cache_data_in, cache_data_out;
+reg  [DATA_W-1:0]    cache_data_in;
+reg [DATA_W-1:0]    cache_data_out;
+wire [DATA_W-1:0]    data_block_out;
+
+
+// wire [DATA_W:0] data_block_out;
+// assign data_block_out = cache_data_out;
 
 reg                  cache_tag_we;
-reg  [TAG_MEM_W-1:0] cache_tag_block_in, cache_tag_block_out;
+reg  [TAG_MEM_W-1:0] cache_tag_block_in;
+reg [TAG_MEM_W-1:0] cache_tag_block_out;
+wire [TAG_MEM_W-1:0] tag_block_out;
+
+// wire [TAG_MEM_W-1:0] tag_block_out;
+// assign tag_block_out = cache_tag_block_out;
 
 reg [DATA_W:0] _cpu_data_result;
 reg            _cpu_data_ready;
@@ -60,12 +71,12 @@ assign cache2mem_MemRead = _mem_req_MemRead;
 // -->      Cache Memory      <--  //
 // =============================== //
 
-cache_tag_memory tag_mem (.iCLK(iCLK), .tag_valid(tag_valid), 
-                          .idx(index), .tag_block_out(cache_tag_block_out),
+cache_tag_memory tag_mem (.iCLK(iCLK), 
+                          .idx(index), .tag_block_out(tag_block_out),
                           .tag_we(cache_tag_we), .tag_block_in(cache_tag_block_in));
 
-cache_data_memory cache_data_mem (.iCLK(iCLK), .data_valid(cache_data_valid), 
-                          .idx(index), .data_block_out(cache_data_out),
+cache_data_memory cache_data_mem (.iCLK(iCLK),
+                          .idx(index), .data_block_out(data_block_out),
                           .data_we(cache_data_we), .data_block_in(cache_data_in));
 
 // =============================== //
@@ -91,53 +102,62 @@ cache_data_memory cache_data_mem (.iCLK(iCLK), .data_valid(cache_data_valid),
 
 // Cache Finite-State Machine
 localparam IDLE         = 3'h00,
-           CACHE_ACCESS = 3'h01;
-           ALLOCATE     = 3'h02;
+           CACHE_ACCESS = 3'h01,
+           ALLOCATE     = 3'h02,
            WRITE_BACK   = 3'h03;
 
-reg [2:0] state, _state = 0;
+reg [2:0] state, _state;
 reg write_complete = 1;
 
 // Controle the state machine variable
 always @(posedge iCLK or negedge iRST_n) begin
-    if (!iRST_n)
+    if (!iRST_n) begin
         state <= IDLE;
         write_complete = 1;
-    else
+    end else begin
         state <= _state;
+        cache_tag_block_out <= tag_block_out;
+        // cache_data_out <= data_block_out;
 
         if (state == WRITE_BACK && write_complete) 
             write_complete = 0;
         else
             write_complete = 1;
+
+        $display(state);
+        
+    end
 end
+
+// TODO: continue working on the writing operation
 
 // Infinite-State Machine
 always @(*) begin
     // Default values
     _state = state;
-
-    _cpu_data_ready  = 1;
-    _cpu_data_result = cache_data_out;
+    _cpu_data_result = data_block_out;
 
     cache_tag_we = 0;
     cache_tag_block_in = 0;
+    // cache_tag_block_out = tag_block_out;
 
     cache_data_we = 0;
-    cache_data_in = cpu2cache_data_in;
+    // cache_data_in = cpu2cache_data_in;
 
     _mem_req_MemRead = 0;
     _mem_req_MemWrite = 0;
     case (state)
         IDLE: begin
+            _cpu_data_ready  = 1;
             // Wait for a request from the CPU
             if (cpu2cache_valid) begin
-                cache2cpu_ready = 1'b0;     // Stop the CPU
+                _cpu_data_ready = 1'b0;     // Stop the CPU
                 _state = CACHE_ACCESS;      // Got to the CACHE_ACCESS state
             end
         end
         CACHE_ACCESS: begin
             // Compare the the tag
+            $display("cache_tag_block_out: %b", cache_tag_block_out);
             if (tag == cache_tag_block_out[TAG_W-1:0] && cache_tag_block_out[VALID_BIT]) begin
                 // cache hit:
                 // The data should be in "cache_data_out"
@@ -159,18 +179,20 @@ always @(*) begin
 
                 // Request the data from RAM
                 // if (cpu2cache_rw) _mem_req_MemWrite = 1'b1;
-                _mem_req_MemRead  = 1'b1;
-
-                if (cache_tag_block_out[VALID_BIT] == 1'b0 || cache_tag_block_out[DIRTY_BIT] == 1'b0)
+                if (!cache_tag_block_out[VALID_BIT] || cache_tag_block_out[VALID_BIT] === 1'bx || 
+                    !cache_tag_block_out[DIRTY_BIT] || cache_tag_block_out[DIRTY_BIT] === 1'bx) begin
                     // Allocate new block of memory in cache on compulsory miss or miss with clean block
+                    _mem_req_MemRead  = 1'b1;
                     _state = ALLOCATE;
-                else begin
+                    $display("READING Memory ...");
+                end else begin
                     // write back address
                     // fpga.aligned_address --> mem_controller.address
                     // cpu.cpu_data_out     --> mem_controller.data_out
                     // cache_memWrite       --> mem_controller.
                     _mem_req_MemWrite = 1'b1;
                     _state = WRITE_BACK;
+                    $display("WRITING to Memory ...");
                 end
             end
         end
@@ -187,6 +209,7 @@ always @(*) begin
                 _mem_req_MemWrite = 0;
                 _mem_req_MemRead = 1;
                 _state = ALLOCATE;
+                $display("READING the data back ...");
             end
         end
     endcase
