@@ -78,7 +78,7 @@ module tb_cache ;
     end
 
     always begin
-        $display("Cycle: %d", i);
+        $display("======( CLK Cycle: %d )======", i);
         #1;
         iCLK = ~iCLK;
         #1
@@ -86,19 +86,31 @@ module tb_cache ;
         i = i + 1;
 
         if (i == 8) begin
-            mem2cache_data_in = 3;
+            mem2cache_data_in = 5;
             mem2cache_ready = 1;
         end
         if (i == 9) begin
             mem2cache_data_in = 0;
             mem2cache_ready = 0;
         end
-        if (i == 12) begin
-            mem2cache_data_in = 0;
+        if (i == 13) begin
+            mem2cache_data_in = 10;
             mem2cache_ready = 1;
         end
+        if (i == 14) begin
+            mem2cache_data_in = 0;
+            mem2cache_ready = 0;
+        end
+        if (i == 30) begin
+            mem2cache_data_in = 20;
+            mem2cache_ready = 1;
+        end
+        if (i == 21) begin
+            mem2cache_data_in = 20;
+            mem2cache_ready = 0;
+        end
 
-        if (i == 25)
+        if (i == 35)
             $stop;
     end
 
@@ -107,63 +119,125 @@ module tb_cache ;
             case (state)
                 0: begin
                     state = 1;
+                    // Does nothing
+                    cpu2cache_addr = 0;
+                    cpu2cache_data_in = 0;
+                    cpu2cache_rw = 0;
+                    cpu2cache_valid = 0;
                 end
                 1: begin
                     state = 2;
-                end
-                2: begin
-                    // Does nothing
-                    cpu2cache_addr = 4;
-                    cpu2cache_data_in = 0;
-                    cpu2cache_rw = 0;
-                    cpu2cache_valid = 0;
-                    state = 3;
-                end
-                3: begin
-                    // read from memory
-                    cpu2cache_addr = 4;
-                    cpu2cache_data_in = 5;
-                    cpu2cache_rw = 0;
-                    cpu2cache_valid = 1;
-                    state = 4;
-                end
-                4: begin
-                    cpu2cache_addr = 4;
-                    cpu2cache_data_in = 0;
-                    cpu2cache_rw = 0;
-                    cpu2cache_valid = 0;
-                    $display("data_buffer = %d", cache2cpu_data_out);
-                    state = 5;
-                end
-                5: begin
-                    // read another location in memory
-                    cpu2cache_addr = 4;
-                    cpu2cache_data_in = 0;
-                    cpu2cache_rw = 0;
-                    cpu2cache_valid = 1;
-                    state = 6;
-                end
-                6: begin
-                    // read from memory
-                    cpu2cache_addr = 8;
-                    cpu2cache_data_in = 5;
-                    cpu2cache_rw = 0;
-                    cpu2cache_valid = 0;
-                    $display("data_buffer 2 = %d", cache2cpu_data_out);
-                    state = 7;
-                end
-                7: begin
+                    // Write to address 4
                     cpu2cache_addr = 4;
                     cpu2cache_data_in = 5;
                     cpu2cache_rw = 1;
+                    cpu2cache_valid = 1;
+                    $display("Write %d to Address: 0x%x", cpu2cache_data_in, cpu2cache_addr);
+                end
+                2: begin
+                    // Write to address 8
+                    cpu2cache_addr = 8;
+                    cpu2cache_data_in = 10;
+                    cpu2cache_rw = 1;
+                    cpu2cache_valid = 1;
+                    $display("Writing %d to Address: 0x%x", cpu2cache_data_in, cpu2cache_addr);
+                    state = 3;
+                end
+                3: begin
+                    // Reading address 4
+                    cpu2cache_addr = 4;
+                    cpu2cache_data_in = 0;
+                    cpu2cache_rw = 0;
+                    cpu2cache_valid = 1;
+                    $display("Reading Address: 0x%x", cpu2cache_addr);
+                    state = 4;
+                end
+                4: begin
+                    // data should be ready here
+                    cpu2cache_addr = 0;
+                    cpu2cache_data_in = 0;
+                    cpu2cache_rw = 0;
                     cpu2cache_valid = 0;
+                    $display("Expect 5, Got %d", cache2cpu_data_out);
+                    state = 5;
+                end
+                5: begin
+                    // Reading address 8
+                    cpu2cache_addr = 8;
+                    cpu2cache_data_in = 0;
+                    cpu2cache_rw = 0;
+                    cpu2cache_valid = 1;
+                    $display("Reading Address: 0x%x", cpu2cache_addr);
+                    state = 6;
+                end
+                6: begin
+                    // data should be ready here
+                    cpu2cache_addr = 0;
+                    cpu2cache_data_in = 0;
+                    cpu2cache_rw = 0;
+                    cpu2cache_valid = 0;
+                    $display("Expect 10, Got %d", cache2cpu_data_out);
+                    state = 7;
+                end
+                7: begin
+                    // Write another value to address 4
+                    cpu2cache_addr = 4;
+                    cpu2cache_data_in = 15;
+                    cpu2cache_rw = 1;
+                    cpu2cache_valid = 1;
+                    $display("Writing to Address: 0x%x", cpu2cache_addr);
                     state = 8;
                 end
                 8: begin
-                    
+                    // Reading address 4
+                    cpu2cache_addr = 4;
+                    cpu2cache_data_in = 0;
+                    cpu2cache_rw = 0;
+                    cpu2cache_valid = 1;
+                    $display("Reading Address: 0x%x", cpu2cache_addr);
+                    state = 9;
                 end
+                9: begin
+                    // data should be ready here
+                    cpu2cache_addr = 0;
+                    cpu2cache_data_in = 0;
+                    cpu2cache_rw = 0;
+                    cpu2cache_valid = 0;
+                    $display("Expect 15, Got %d", cache2cpu_data_out);
+                    state = 10;
+                end
+                10: begin
+                    // write another data to the same memory location
+                    cpu2cache_addr = 132;
+                    cpu2cache_data_in = 20;
+                    cpu2cache_rw = 1;
+                    cpu2cache_valid = 1;
+                    $display("Writing to Address: 0x%x", cpu2cache_addr);
+                    state = 11;
+                end
+                11: begin
+                    // Confirm that the data was written to memory
+                    cpu2cache_addr = 132;
+                    cpu2cache_data_in = 0;
+                    cpu2cache_rw = 0;
+                    cpu2cache_valid = 1;
+                    $display("Reading Address: 0x%x", cpu2cache_addr);
+                    state = 12;
+                end
+                12: begin
+                    // data should be ready here
+                    cpu2cache_addr = 0;
+                    cpu2cache_data_in = 0;
+                    cpu2cache_rw = 0;
+                    cpu2cache_valid = 0;
+                    $display("Expect 20, Got %d", cache2cpu_data_out);
+                    state = 13;
+                end
+                13: begin
                 
+                end
             endcase
+        $display("--> Instruction: 0x%x", state);
     end
 
 endmodule

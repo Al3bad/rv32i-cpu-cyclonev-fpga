@@ -29,7 +29,7 @@ reg  [TAG_MEM_W-1:0] cache_tag_mem[IDX_SIZE-1:0];
 
 always @(iCLK) begin
     if(tag_we) begin
-        $display("Cache Memory (tag): Writing %b to idx %d", tag_block_in, idx);
+        // $display("Cache Memory (tag): Writing %b to idx %d", tag_block_in, idx);
         cache_tag_mem[idx] <= tag_block_in;
     end
 end

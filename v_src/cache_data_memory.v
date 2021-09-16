@@ -27,7 +27,7 @@ reg  [DATA_W-1:0] cache_data_mem[IDX_SIZE-1:0];
 
 always @(iCLK) begin
     if(data_we) begin
-        $display("Cache Memory (data): Writing %b to idx %d", data_block_in, idx);
+        $display("Cache Memory (data): Writing %d to idx 0x%x", data_block_in, idx);
         cache_data_mem[idx] <= data_block_in;
     end
 end

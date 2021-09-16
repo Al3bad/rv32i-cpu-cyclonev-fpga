@@ -1,3 +1,9 @@
+// TODO:
+// [x] Write to cache memory on cache hit
+// [x] Read from cache memeory on cache hit
+// [ ] Write to RAM on cache miss
+// [x] Read from RAM on cache miss
+
 module cache_controller # (
     parameter  ADDR_W    = 32,
                OFFSET_W  = 2,
@@ -90,11 +96,15 @@ cache_data_memory cache_data_mem (.iCLK(iCLK),
 
 // address    tag       idx  offset
 // 0:     ..0000000000 00000 00
-// 4:     ..0000000000 00001 00
+// 4:     ..0000000000 00001 00         <--
 // 8:     ..0000000000 00010 00
 // 12:    ..0000000000 00100 10
 // 16:    ..0000000000 00101 10
 // 20:    ..0000000000 01000 00
+// ...
+// ...
+// 132:   ..0000000001 00001 00         <-- 
+
 
 // |------------------------ Address (ADDR_W-bit) ------------------------|
 // |----------------- tag -----------------|----- index -----|-- offset --|
@@ -125,11 +135,8 @@ always @(posedge iCLK or negedge iRST_n) begin
             write_complete = 1;
 
         $display(state);
-        
     end
 end
-
-// TODO: continue working on the writing operation
 
 // Infinite-State Machine
 always @(*) begin
@@ -157,15 +164,19 @@ always @(*) begin
         end
         CACHE_ACCESS: begin
             // Compare the the tag
-            $display("cache_tag_block_out: %b", cache_tag_block_out);
+            // $display("cache_tag_block_out: %b", cache_tag_block_out);
             if (tag == cache_tag_block_out[TAG_W-1:0] && cache_tag_block_out[VALID_BIT]) begin
                 // cache hit:
+                $display("CACHE HIT ...");
                 // The data should be in "cache_data_out"
                 _cpu_data_ready = 1'b1;
 
                 if (cpu2cache_rw) begin
                     // read & modify the cache line
+                    $display("Writing to cache ...");
                     cache_data_we = 1'b1;
+                    cache_data_in = cpu2cache_data_in;
+
                     cache_tag_we = 1'b1; 
                     cache_tag_block_in = {1'b1, 1'b1, cache_tag_block_out[TAG_W-1:0]}; // <valid-bit>, <dirty-bit>, <tag>
                 end
@@ -173,14 +184,14 @@ always @(*) begin
                 _state = IDLE;
             end else begin
                 // cache miss
+                $display("CACHE MISS ...");
                 // generate new tag
                 cache_tag_we =  1'b1;
                 cache_tag_block_in = {1'b1, cpu2cache_rw, tag}; // <valid-bit>, <dirty-bit>, <tag>
 
                 // Request the data from RAM
                 // if (cpu2cache_rw) _mem_req_MemWrite = 1'b1;
-                if (!cache_tag_block_out[VALID_BIT] || cache_tag_block_out[VALID_BIT] === 1'bx || 
-                    !cache_tag_block_out[DIRTY_BIT] || cache_tag_block_out[DIRTY_BIT] === 1'bx) begin
+                if (!cache_tag_block_out[VALID_BIT] || !cache_tag_block_out[DIRTY_BIT]) begin
                     // Allocate new block of memory in cache on compulsory miss or miss with clean block
                     _mem_req_MemRead  = 1'b1;
                     _state = ALLOCATE;
@@ -209,7 +220,7 @@ always @(*) begin
                 _mem_req_MemWrite = 0;
                 _mem_req_MemRead = 1;
                 _state = ALLOCATE;
-                $display("READING the data back ...");
+                $display("Read the written data from memory, then allocate in cache ...");
             end
         end
     endcase
