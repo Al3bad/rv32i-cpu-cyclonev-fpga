@@ -20,18 +20,18 @@ module tb_cache ;
     reg               cpu2cache_valid;
 
     // CPU <-- Cache controller (Cache result)
-    wire [DATA_W:0]   cache2cpu_data_out;    // data returned to the cpu
+    wire [DATA_W-1:0]   cache2cpu_data_out;    // data returned to the cpu
     wire              cache2cpu_ready;
 
     // Cache controller --> RAM (Memory request)
-    // wire  [ADDR_W-1:0] cache_addr,
-    // wire  [DATA_W-1:0] cache_data_in,
+    wire  [ADDR_W-1:0] cache2mem_addr;
+    wire  [DATA_W-1:0] cache2mem_data;
     wire              cache2mem_MemWrite;
     wire              cache2mem_MemRead;
     // wire               cache_valid,
 
     // Cache controller <-- RAM (Memory result)
-    reg [DATA_W:0]    mem2cache_data_in;    // data returned to the cache controller
+    reg [DATA_W-1:0]    mem2cache_data_in;    // data returned to the cache controller
     reg               mem2cache_ready;
 
     cache_controller cc (
@@ -46,6 +46,8 @@ module tb_cache ;
         .cache2cpu_data_out(cache2cpu_data_out),
         .cache2cpu_ready(cache2cpu_ready),
         // Cache controller --> RAM (Memory request)
+        .cache2mem_addr(cache2mem_addr),
+        .cache2mem_data(cache2mem_data),
         .cache2mem_MemWrite(cache2mem_MemWrite),
         .cache2mem_MemRead(cache2mem_MemRead),
         // Cache controller <-- RAM (Memory result)
@@ -85,6 +87,14 @@ module tb_cache ;
         iCLK = ~iCLK;
         i = i + 1;
 
+        if (i == 4) begin
+            mem2cache_data_in = 234;
+            mem2cache_ready = 1;
+        end
+        if (i == 5) begin
+            mem2cache_data_in = 0;
+            mem2cache_ready = 0;
+        end
         if (i == 8) begin
             mem2cache_data_in = 5;
             mem2cache_ready = 1;
@@ -105,7 +115,7 @@ module tb_cache ;
             mem2cache_data_in = 20;
             mem2cache_ready = 1;
         end
-        if (i == 21) begin
+        if (i == 31) begin
             mem2cache_data_in = 20;
             mem2cache_ready = 0;
         end
@@ -115,24 +125,25 @@ module tb_cache ;
     end
 
     always @(posedge iCLK) begin
-        if (cache2cpu_ready)
+        if (cache2cpu_ready) begin
+            $display("--> Instruction: 0x%x", state);
             case (state)
                 0: begin
-                    state = 1;
                     // Does nothing
                     cpu2cache_addr = 0;
                     cpu2cache_data_in = 0;
                     cpu2cache_rw = 0;
                     cpu2cache_valid = 0;
+                    state = 1;
                 end
                 1: begin
-                    state = 2;
                     // Write to address 4
                     cpu2cache_addr = 4;
                     cpu2cache_data_in = 5;
                     cpu2cache_rw = 1;
                     cpu2cache_valid = 1;
                     $display("Write %d to Address: 0x%x", cpu2cache_data_in, cpu2cache_addr);
+                    state = 2;
                 end
                 2: begin
                     // Write to address 8
@@ -237,7 +248,7 @@ module tb_cache ;
                 
                 end
             endcase
-        $display("--> Instruction: 0x%x", state);
+        end
     end
 
 endmodule

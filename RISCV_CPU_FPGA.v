@@ -104,89 +104,28 @@ debounce d1(
 );
 
 //=======================================================
-//  CPU : REG/WIRE declarations
-//=======================================================
-
-wire [27:0] cpu_addr;
-wire [31:0] cpu_data_out;
-wire cpu_MemWrite;
-wire cpu_MemRead;
-wire [31:0] cpu_data_in;
-wire cpu_pcEn;
-
-//=======================================================
-//  CPU : Structural coding
-//=======================================================
-
-assign cpu_pcEn = (cache_data_ready)? 1'b1 : 1'b0;
-CPU_pipelined cpu (
-    .iRST_n(Debounce_KEY0),
-    .rom_clk(DDR3_CLK), 
-    .clk(FPGA_CLK2_50),
-    .pcEn(cpu_pcEn),
-
-    .WB_ALUout(wb_data),
-    .addr(cpu_addr),
-    .data_out(cpu_data_out),
-    .MemWrite(cpu_MemWrite),
-    .MemRead(cpu_MemRead),
-    .data_in(cpu_data_in)
-);
-
-//=======================================================
-//  Cache : REG/WIRE declarations
-//=======================================================
-
-wire cpu_rw;
-wire cpu_valid;
-wire cache_data_ready;
-
-wire cache_rw;
-wire cache_valid;
-wire cache_MemRead;
-wire cache_MemWrite;
-
-//=======================================================
-//  Cache : Structural coding
-//=======================================================
-
-assign cpu_rw    = (cpu_MemWrite)?                1'b1 : 1'b0;
-assign cpu_valid = (cpu_MemWrite || cpu_MemRead)? 1'b1 : 1'b0; 
-cache_controller cc (
-        .iCLK(FPGA_CLK2_50),
-        // CPU --> Cache conterller (CPU request)
-        .cpu2cache_addr(cpu_addr),
-        .cpu2cache_rw(cpu_rw),
-        .cpu2cache_valid(cpu_valid),
-        .cpu2cache_data_in(cpu_data_out),
-        // CPU <-- Cache controller (Cache result)
-        .cache2cpu_data_out(cpu_data_in),
-        .cache2cpu_ready(cache_data_ready),
-        // Cache controller --> RAM (Memory request)
-        .cache2mem_MemWrite(cache_MemWrite),
-        .cache2mem_MemRead(cache_MemRead),
-        // Cache controller <-- RAM (Memory result)
-        .mem2cache_data_in(mem_data_out),
-        .mem2cache_ready(data_ready)
-);
-
-//=======================================================
 //  Memory Interface : REG/WIRE declarations
 //=======================================================
 
-wire [26:0]         aligned_address;
-wire                ddr3_avl_wait;             //   .avl.waitrequest
-wire [26:0]         ddr3_avl_address;          //   .address
-wire                ddr3_avl_readdatavalid;    //   .readdatavalid
-wire [127:0]        ddr3_avl_readdata;         //   .readdata
-wire [127:0]        ddr3_avl_writedata;        //   .writedata
-wire                ddr3_avl_read;             //   .read
-wire                ddr3_avl_write;            //   .write
-wire [DATA_W-1:0]   mem_data_out;
-wire                data_received;
-wire                data_ready;
+localparam RAM_ADDR_W = 26;
+localparam RAM_DATA_W = 128;
 
-reg [7:0]           LED_REG;
+wire [RAM_ADDR_W-1:0]       ddr3_avl_address;          //   .address
+wire [RAM_DATA_W-1:0]       ddr3_avl_writedata;        //   .writedata
+wire [RAM_DATA_W-1:0]       ddr3_avl_readdata;         //   .readdata
+wire                        ddr3_avl_wait;             //   .avl.waitrequest
+wire                        ddr3_avl_readdatavalid;    //   .readdatavalid
+wire                        ddr3_avl_read;             //   .read
+wire                        ddr3_avl_write;            //   .write
+
+wire [RAM_DATA_W-1:0]       mem2cache_data;
+wire                        mem2cache_dataready;
+
+wire [31:0]                 mem_data_out;
+wire                        data_received;
+wire                        data_ready;
+
+reg [7:0]                   LED_REG;
 
 //=======================================================
 //  Memory Interface : Structural coding
@@ -199,45 +138,120 @@ reg [7:0]           LED_REG;
 // Max address from cpu to RAM must = 0x04 
 
 assign LED = LED_REG;
-assign aligned_address = (cpu_addr == 26'h00)? 27'h00 : cpu_addr + 27'hC;
-
-always @(posedge DDR3_CLK, negedge Debounce_KEY0) begin
-    // LEDs
-    if (!Debounce_KEY0) begin
-        LED_REG[7:0] <= 0;
-    end
-    else begin
-        LED_REG[7] <= heart_beat[25] ;
-        if (cpu_addr == 28'h00) begin
-            if (cpu_MemWrite) begin
-                LED_REG[6:0] <= cpu_data_out[6:0];
-            end
-        end
-    end
-end
+// always @(posedge DDR3_CLK, negedge Debounce_KEY0) begin
+//     // LEDs
+//     if (!Debounce_KEY0) begin
+//         LED_REG[7:0] <= 0;
+//     end
+//     else begin
+//         LED_REG[7] <= heart_beat[25] ;
+//         if (cpu2cache_addr == 28'h00) begin
+//             if (cpu2cache_MemWrite) begin
+//                 LED_REG[6:0] <= cpu2cache_data[6:0];
+//             end
+//         end
+//     end
+// end
 
  mem_interface mi(
-		.iCLK(FPGA_CLK2_50),
-		.iRST_n(Debounce_KEY0),
+		.iCLK               (FPGA_CLK2_50),
+		.iRST_n             (Debounce_KEY0),
 		
         // Avalon Interface
-		.avl_wait(ddr3_avl_wait),                 
-		.avl_address(ddr3_avl_address),                      
-		.avl_readdatavalid(ddr3_avl_readdatavalid),                 
-		.avl_readdata(ddr3_avl_readdata),                      
-		.avl_writedata(ddr3_avl_writedata),                     
-		.avl_read(ddr3_avl_read),                          
-		.avl_write(ddr3_avl_write),
+		.avl_wait           (ddr3_avl_wait),                 
+		.avl_address        (ddr3_avl_address),                      
+		.avl_readdatavalid  (ddr3_avl_readdatavalid),                 
+		.avl_readdata       (ddr3_avl_readdata),                      
+		.avl_writedata      (ddr3_avl_writedata),                     
+		.avl_read           (ddr3_avl_read),                          
+		.avl_write          (ddr3_avl_write),
 
-        // CPU
-        .cpu_addr(aligned_address),
-        .cpu_data_out(cpu_data_out),      // CPU --> mem_mangt --> avl.writedata
-		.cpu_data_in(mem_data_out),        // CPU <-- mem_mangt <-- avl.readdata
-        .cpu_MemRead(cache_MemRead),
-        .cpu_MemWrite(cache_MemWrite),
-        .value_received(value_received),
-        .data_ready(data_ready)
+        // Cache
+        .mem_addr           (cache2mem_addr),     // RAM.address  <-- mem_mangt <-- CACHE.addr
+        .mem_data_out       (mem2cache_data),     // RAM.data     --> mem_mangt --> CACHE.data
+		.mem_data_in        (cache_data_out),     // RAM.data     <-- mem_mangt <-- CACHE.data
+        .mem_MemRead        (cache_MemRead),
+        .mem_MemWrite       (cache_MemWrite),
+        .data_ready         (mem2cache_dataready),
+        .value_received     (value_received)
 );
+
+//=======================================================
+//  Cache : REG/WIRE declarations
+//=======================================================
+
+wire cpu_rw;
+wire cpu_valid;
+
+wire [CPU_DATA_W-1:0]   cache2cpu_data;
+wire                    cache2cpu_dataready;
+
+wire [CPU_ADDR_W-1:0]   cache2mem_addr;
+wire [CPU_DATA_W-1:0]   cache2mem_data;
+wire                    cache2mem_rw;
+wire                    cache2mem_valid;
+wire                    cache2mem_MemRead;
+wire                    cache2mem_MemWrite;
+
+//=======================================================
+//  Cache : Structural coding
+//=======================================================
+
+assign cpu_rw    = (cpu2cache_MemWrite)?                1'b1 : 1'b0;
+assign cpu_valid = ((cpu2cache_MemWrite || cpu2cache_MemRead) && (cpu2cache_addr != 32'h00))? 1'b1 : 1'b0; 
+cache_controller cc (
+        .iCLK               (FPGA_CLK2_50),
+        .iRST_n             (Debounce_KEY0),
+        // CPU --> Cache controller (CPU request)
+        .cpu2cache_rw       (cpu_rw),
+        .cpu2cache_valid    (cpu_valid),
+        .cpu2cache_addr     (cpu2cache_addr),
+        .cpu2cache_data_in  (cpu2cache_data),
+        // CPU <-- Cache controller (Cache result)
+        .cache2cpu_data_out (cache2cpu_data),
+        .cache2cpu_ready    (cache2cpu_dataready),
+        // Cache controller --> RAM (Memory request)
+        .cache2mem_addr     (cache2mem_addr),
+        .cache2mem_data     (cache2mem_data_out),
+        .cache2mem_MemWrite (cache2mem_MemWrite),
+        .cache2mem_MemRead  (cache2mem_MemRead),
+        // Cache controller <-- RAM (Memory result)
+        .mem2cache_data_in  (mem2cache_data),
+        .mem2cache_ready    (mem2cache_dataready)
+);
+
+//=======================================================
+//  CPU : REG/WIRE declarations
+//=======================================================
+
+localparam CPU_ADDR_W = 32;
+localparam CPU_DATA_W = 32;
+
+// wire [CPU_ADDR_W-1:0]   cpu2cache_addr;
+// wire [CPU_DATA_W-1:0]   cpu2cache_data;
+// wire                    cpu2cache_MemWrite;
+// wire                    cpu2cache_MemRead;
+// wire                    cpu_pcEn;
+
+// //=======================================================
+// //  CPU : Structural coding
+// //=======================================================
+
+assign cpu_pcEn = (cache2cpu_dataready)? 1'b1 : 1'b0;
+// CPU_pipelined cpu (
+//     .iRST_n     (Debounce_KEY0),
+//     .rom_clk    (DDR3_CLK), 
+//     .clk        (FPGA_CLK2_50),
+//     .pcEn       (cpu_pcEn),
+
+//     .WB_ALUout  (wb_data),    // this port is not needed
+//     .addr       (cpu2cache_addr),
+//     .data_out   (cpu2cache_data),
+//     .MemWrite   (cpu2cache_MemWrite),
+//     .MemRead    (cpu2cache_MemRead),
+//     .data_in    (cache2cpu_data)
+// );
+
 
 //=======================================================
 //  Heart beat
@@ -248,64 +262,126 @@ always @(posedge FPGA_CLK2_50) begin
     heart_beat <= heart_beat + 1'b1;
 end
 
-// reg [3:0] state = 4'h0;
-// reg [25:0] counter = 3'h0;
+reg [4:0] state = 4'h0;
+reg [25:0] counter = 3'h0;
+reg [31:0] data_buffer;
 
-// always @(posedge FPGA_CLK2_50 or negedge Debounce_KEY0) begin
-//     if (!Debounce_KEY0) begin
-//         state <=  4'h0;
-//         counter <= 25'h00;
-//         // LED_REG[7:4] <= 0;
-//     end else begin
-//         counter <= counter + 1;
-//         // if(ddr3_avl_readdatavalid) LED_REG[7:4] <= state;
-//         if (cpu_pcEn)
-//             case (state)
-//                 0: begin
-//                     cpu_MemWrite <= 1'b1;
-//                     cpu_MemRead <= 1'b0;
-//                     cpu_addr <= 26'h04;
-//                     cpu_data_out <= 128'h05;
-//                     state <= 1;
-//                 end  
-//                 1: begin
-//                     cpu_MemWrite <= 1'b1;
-//                     cpu_MemRead <= 1'b0;
-//                     cpu_addr <= 26'h8;
-//                     cpu_data_out <= 128'h0A;
-//                     state <= 3;
-//                 end
-//                 2: begin
-//                     state <= 3;
-//                 end
-//                 3: begin
-//                     cpu_MemWrite <= 1'b0;
-//                     cpu_MemRead <= 1'b1;
-//                     cpu_addr <= 26'h8;
-//                     state <= 4;
-//                 end
-//                 4: begin
-//                     cpu_MemWrite <= 1'b0;
-//                     cpu_MemRead <= 1'b0;
-//                     data_buffer <= cpu_data_in;
-//                     state <= 5;
-//                 end  
-//                 5: begin
-//                     state <= 6;
-//                 end 
-//                 6: begin
-//                     cpu_MemWrite <= 1'b1;
-//                     cpu_MemRead <= 1'b0;
-//                     cpu_addr <= 26'h00;
-//                     cpu_data_out <= data_buffer;
-//                     state <= 7;
-//                 end
-//                 7: begin
-//                     cpu_MemWrite <= 1'b0;
-//                     cpu_MemRead <= 1'b0;
-//                 end
-//             endcase
-//     end
-// end
+
+// TODO: Comment out the CPU. Create registers for the necessary signals. Test the memory access operation
+
+reg [CPU_ADDR_W-1:0]   cpu2cache_addr;
+reg [CPU_DATA_W-1:0]   cpu2cache_data;
+reg                    cpu2cache_MemWrite;
+reg                    cpu2cache_MemRead;
+wire                    cpu_pcEn;
+
+always @(posedge FPGA_CLK2_50 or negedge Debounce_KEY0) begin
+    if (!Debounce_KEY0) begin
+        state <=  4'h0;
+        counter <= 25'h00;
+        data_buffer <= 0;
+    end else begin
+        counter <= counter + 1;
+        if (cpu_pcEn)
+            case (state)
+                0: begin
+                    cpu2cache_MemWrite <= 1'b1;
+                    cpu2cache_MemRead <= 1'b0;
+                    cpu2cache_addr <= 32'h04;
+                    cpu2cache_data <= 32'h05;
+                    state <= 1;
+                end  
+                1: begin
+                    cpu2cache_MemWrite <= 1'b1;
+                    cpu2cache_MemRead <= 1'b0;
+                    cpu2cache_addr <= 32'h8;
+                    cpu2cache_data <= 32'h0A;
+                    state <= 2;
+                end
+                2: begin
+                    cpu2cache_MemWrite <= 1'b0;
+                    cpu2cache_MemRead <= 1'b1;
+                    cpu2cache_addr <= 26'h8;
+                    state <= 3;
+                end
+                3: begin
+                    cpu2cache_MemWrite <= 1'b0;
+                    cpu2cache_MemRead <= 1'b0;
+                    data_buffer <= cache2cpu_data;
+                    state <= 4;
+                end
+                4: begin
+                    cpu2cache_MemWrite <= 1'b0;
+                    cpu2cache_MemRead <= 1'b1;
+                    cpu2cache_addr <= 32'h4;
+                    state <= 5;
+                end  
+                5: begin
+                    cpu2cache_MemWrite <= 1'b0;
+                    cpu2cache_MemRead <= 1'b0;
+                    cpu2cache_addr <= 26'h00;
+                    data_buffer <= data_buffer + cache2cpu_data;
+                    state <= 6;
+                end 
+                6: begin
+                    cpu2cache_MemWrite <= 1'b1;
+                    cpu2cache_MemRead <= 1'b0;
+                    cpu2cache_addr <= 32'h04;
+                    cpu2cache_data <= data_buffer;
+                    state <= 7;
+                end
+                7: begin
+                    cpu2cache_MemWrite <= 1'b0;
+                    cpu2cache_MemRead <= 1'b1;
+                    cpu2cache_addr <= 26'h4;
+                    state <= 8;
+                end
+                8: begin
+                    cpu2cache_MemWrite <= 1'b0;
+                    cpu2cache_MemRead <= 1'b0;
+                    data_buffer <= cache2cpu_data;
+                    state <= 9;
+                end
+                9: begin
+                    // FIXME: Fix the write-back operation
+                    cpu2cache_MemWrite <= 1'b1;
+                    cpu2cache_MemRead <= 1'b0;
+                    cpu2cache_addr <= 32'h84;
+                    cpu2cache_data <= data_buffer + 32'h06;
+                    state <= 10;
+                end
+                10: begin
+                    cpu2cache_MemWrite <= 1'b0;
+                    cpu2cache_MemRead <= 1'b1;
+                    cpu2cache_addr <= 32'h84;
+                    state <= 11;
+                end
+                11: begin
+                    cpu2cache_MemWrite <= 1'b0;
+                    cpu2cache_MemRead <= 1'b0;
+                    LED_REG[6:0] <= cache2cpu_data[6:0];
+                    LED_REG[7] <= 1'b1;
+                    // state <= 12;
+                    // FIXME: =============================
+                end
+                12: begin
+                    cpu2cache_MemWrite <= 1'b0;
+                    cpu2cache_MemRead <= 1'b1;
+                    cpu2cache_addr <= 32'h04;
+                    state <= 13;
+                end
+                13: begin
+                    cpu2cache_MemWrite <= 1'b0;
+                    cpu2cache_MemRead <= 1'b0;
+                    LED_REG[6:0] <= cache2cpu_data[6:0];
+                    LED_REG[7] <= 1'b1;
+                    state <= 14;
+                end
+                14: begin
+                    
+                end
+            endcase
+    end
+end
 
 endmodule

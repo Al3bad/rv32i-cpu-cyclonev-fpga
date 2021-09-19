@@ -154,22 +154,6 @@ https://fpgasoftware.intel.com/eula.
 )
 (pin
 	(output)
-	(rect 1616 696 1792 712)
-	(text "OUTPUT" (rect 1 0 39 10)(font "Arial" (font_size 6)))
-	(text "addr[27..0]" (rect 90 0 143 12)(font "Arial" ))
-	(pt 0 8)
-	(drawing
-		(line (pt 0 8)(pt 52 8))
-		(line (pt 52 4)(pt 78 4))
-		(line (pt 52 12)(pt 78 12))
-		(line (pt 52 12)(pt 52 4))
-		(line (pt 78 4)(pt 82 8))
-		(line (pt 82 8)(pt 78 12))
-		(line (pt 78 12)(pt 82 8))
-	)
-)
-(pin
-	(output)
 	(rect 1616 712 1792 728)
 	(text "OUTPUT" (rect 1 0 39 10)(font "Arial" (font_size 6)))
 	(text "data_out[31..0]" (rect 90 0 161 17)(font "Intel Clear" ))
@@ -221,6 +205,22 @@ https://fpgasoftware.intel.com/eula.
 	(rect 720 608 896 624)
 	(text "OUTPUT" (rect 1 0 39 10)(font "Arial" (font_size 6)))
 	(text "imm[31..0]" (rect 90 0 143 12)(font "Arial" ))
+	(pt 0 8)
+	(drawing
+		(line (pt 0 8)(pt 52 8))
+		(line (pt 52 4)(pt 78 4))
+		(line (pt 52 12)(pt 78 12))
+		(line (pt 52 12)(pt 52 4))
+		(line (pt 78 4)(pt 82 8))
+		(line (pt 82 8)(pt 78 12))
+		(line (pt 78 12)(pt 82 8))
+	)
+)
+(pin
+	(output)
+	(rect 1616 696 1792 712)
+	(text "OUTPUT" (rect 1 0 39 10)(font "Arial" (font_size 6)))
+	(text "addr[31..0]" (rect 90 0 143 12)(font "Arial" ))
 	(pt 0 8)
 	(drawing
 		(line (pt 0 8)(pt 52 8))
@@ -1544,12 +1544,6 @@ https://fpgasoftware.intel.com/eula.
 	(bus)
 )
 (connector
-	(text "ALUout[27..0]" (rect 1800 529 1817 593)(font "Intel Clear" )(vertical))
-	(pt 1816 424)
-	(pt 1816 656)
-	(bus)
-)
-(connector
 	(pt 2120 256)
 	(pt 2120 216)
 	(color 0 170 0)
@@ -1758,6 +1752,12 @@ https://fpgasoftware.intel.com/eula.
 (connector
 	(pt 1584 440)
 	(pt 1616 440)
+	(bus)
+)
+(connector
+	(text "ALUout[31..0]" (rect 1800 529 1817 593)(font "Intel Clear" )(vertical))
+	(pt 1816 424)
+	(pt 1816 656)
 	(bus)
 )
 (junction (pt 1040 256))

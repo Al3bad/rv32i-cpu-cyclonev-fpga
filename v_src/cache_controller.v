@@ -1,18 +1,14 @@
 // TODO:
 // [x] Write to cache memory on cache hit
 // [x] Read from cache memeory on cache hit
-// [ ] Write to RAM on cache miss
+// [x] Write to RAM on cache miss
 // [x] Read from RAM on cache miss
 
 module cache_controller # (
     parameter  ADDR_W    = 32,
-               OFFSET_W  = 2,
-               IDX_W     = 5,
                DATA_W    = 32,
-    localparam TAG_W     = ADDR_W - IDX_W - OFFSET_W,
-               TAG_MEM_W = TAG_W + 2,
-               VALID_BIT = TAG_MEM_W - 1,
-               DIRTY_BIT = TAG_MEM_W - 2
+               OFFSET_W  = 2,
+               IDX_W     = 5
 ) (
     input               iCLK,
     input               iRST_n,
@@ -23,20 +19,24 @@ module cache_controller # (
     input               cpu2cache_valid,
 
     // CPU <-- Cache controller (Cache result)
-    output [DATA_W:0]   cache2cpu_data_out,    // data returned to the cpu
+    output [DATA_W-1:0] cache2cpu_data_out,    // data returned to the cpu
     output              cache2cpu_ready,
 
     // Cache controller --> RAM (Memory request)
-    // output  [ADDR_W-1:0] cache_addr,
-    // output  [DATA_W-1:0] cache_data_in,
+    output [ADDR_W-1:0] cache2mem_addr,
+    output [DATA_W-1:0] cache2mem_data,
     output              cache2mem_MemWrite,
     output              cache2mem_MemRead,
-    // output               cache_valid,
 
     // Cache controller <-- RAM (Memory result)
     input [DATA_W:0]    mem2cache_data_in,    // data returned to the cache controller
     input               mem2cache_ready
 );
+
+localparam TAG_W     = ADDR_W - IDX_W - OFFSET_W,
+           TAG_MEM_W = TAG_W + 2,
+           VALID_BIT = TAG_MEM_W - 1,
+           DIRTY_BIT = TAG_MEM_W - 2;
 
 // Extract the the tag & the index from the address
 wire [IDX_W-1:0]     index;
@@ -69,21 +69,12 @@ assign cache2cpu_ready    = _cpu_data_ready;
 
 reg _mem_req_MemWrite;
 reg _mem_req_MemRead;
+reg [ADDR_W-1:0] _mem_req_addr;
+reg [DATA_W-1:0] _mem_req_data_out;
 assign cache2mem_MemWrite = _mem_req_MemWrite;
 assign cache2mem_MemRead = _mem_req_MemRead;
-
-
-// =============================== //
-// -->      Cache Memory      <--  //
-// =============================== //
-
-cache_tag_memory tag_mem (.iCLK(iCLK), 
-                          .idx(index), .tag_block_out(tag_block_out),
-                          .tag_we(cache_tag_we), .tag_block_in(cache_tag_block_in));
-
-cache_data_memory cache_data_mem (.iCLK(iCLK),
-                          .idx(index), .data_block_out(data_block_out),
-                          .data_we(cache_data_we), .data_block_in(cache_data_in));
+assign cache2mem_addr = _mem_req_addr;
+assign cache2mem_data = _mem_req_data_out;
 
 // =============================== //
 // -->    Cache Controller    <--  //
@@ -134,7 +125,7 @@ always @(posedge iCLK or negedge iRST_n) begin
         else
             write_complete = 1;
 
-        $display(state);
+        // $display(state);
     end
 end
 
@@ -153,27 +144,27 @@ always @(*) begin
 
     _mem_req_MemRead = 0;
     _mem_req_MemWrite = 0;
+    _mem_req_data_out = data_block_out;
     case (state)
         IDLE: begin
-            _cpu_data_ready  = 1;
             // Wait for a request from the CPU
             if (cpu2cache_valid) begin
                 _cpu_data_ready = 1'b0;     // Stop the CPU
                 _state = CACHE_ACCESS;      // Got to the CACHE_ACCESS state
-            end
+            end else _cpu_data_ready  = 1;
         end
         CACHE_ACCESS: begin
             // Compare the the tag
             // $display("cache_tag_block_out: %b", cache_tag_block_out);
             if (tag == cache_tag_block_out[TAG_W-1:0] && cache_tag_block_out[VALID_BIT]) begin
                 // cache hit:
-                $display("CACHE HIT ...");
+                // $display("CACHE HIT ...");
                 // The data should be in "cache_data_out"
                 _cpu_data_ready = 1'b1;
 
                 if (cpu2cache_rw) begin
                     // read & modify the cache line
-                    $display("Writing to cache ...");
+                    // $display("Writing to cache ...");
                     cache_data_we = 1'b1;
                     cache_data_in = cpu2cache_data_in;
 
@@ -184,26 +175,28 @@ always @(*) begin
                 _state = IDLE;
             end else begin
                 // cache miss
-                $display("CACHE MISS ...");
+                // $display("CACHE MISS ...");
                 // generate new tag
                 cache_tag_we =  1'b1;
                 cache_tag_block_in = {1'b1, cpu2cache_rw, tag}; // <valid-bit>, <dirty-bit>, <tag>
 
                 // Request the data from RAM
                 // if (cpu2cache_rw) _mem_req_MemWrite = 1'b1;
-                if (!cache_tag_block_out[VALID_BIT] || !cache_tag_block_out[DIRTY_BIT]) begin
+                if (cache_tag_block_out[VALID_BIT] === 1'b0 || cache_tag_block_out[DIRTY_BIT] === 1'b0) begin
                     // Allocate new block of memory in cache on compulsory miss or miss with clean block
                     _mem_req_MemRead  = 1'b1;
+                    _mem_req_addr = cpu2cache_addr + 27'h0C;
                     _state = ALLOCATE;
-                    $display("READING Memory ...");
+                    // $display("READING Memory ...");
                 end else begin
-                    // write back address
-                    // fpga.aligned_address --> mem_controller.address
-                    // cpu.cpu_data_out     --> mem_controller.data_out
-                    // cache_memWrite       --> mem_controller.
+                    // miss with a dirty line
+                    // CACHE.memWrite       --> mem_controller.memWrite
+                    // CACHE.addr           --> mem_controller.address
+                    // CACHE.data_block_out --> mem_controller.data_in
                     _mem_req_MemWrite = 1'b1;
+                    _mem_req_addr = {cache_tag_block_out[TAG_W-1:0], cpu2cache_addr[IDX_W+OFFSET_W-1:0]} + 27'h0C;
                     _state = WRITE_BACK;
-                    $display("WRITING to Memory ...");
+                    // $display("WRITING %d to Memory address 0x%x --> 0x%x ...", _mem_req_data_out, {cache_tag_block_out[TAG_W-1:0], cpu2cache_addr[IDX_W+OFFSET_W-1:0]}, _mem_req_addr);
                 end
             end
         end
@@ -220,11 +213,24 @@ always @(*) begin
                 _mem_req_MemWrite = 0;
                 _mem_req_MemRead = 1;
                 _state = ALLOCATE;
-                $display("Read the written data from memory, then allocate in cache ...");
+                // $display("Writting the data in the dirty line in cache to memory");
             end
         end
     endcase
 end
+
+// =============================== //
+// -->      Cache Memory      <--  //
+// =============================== //
+
+cache_tag_memory tag_mem (.iCLK(iCLK), 
+                          .idx(index), .tag_block_out(tag_block_out),
+                          .tag_we(cache_tag_we), .tag_block_in(cache_tag_block_in));
+
+cache_data_memory cache_data_mem (.iCLK(iCLK),
+                          .idx(index), .data_block_out(data_block_out),
+                          .data_we(cache_data_we), .data_block_in(cache_data_in));
+
 
     
 endmodule

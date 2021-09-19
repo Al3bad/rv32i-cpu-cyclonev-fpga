@@ -4,10 +4,7 @@ module cache_tag_memory # (
               IDX_W = 5,
               VALID_BIT = 1,
               DIRTY_BIT = 1,
-              DATA_W = 32,
-    localparam TAG_W = ADDR_W - IDX_W - OFFSET_W,
-	       TAG_MEM_W = 2 + TAG_W,
-               IDX_SIZE = 2 ** IDX_W
+              DATA_W = 32
 ) (
     input              iCLK,
 
@@ -19,6 +16,9 @@ module cache_tag_memory # (
     output [TAG_MEM_W-1:0] tag_block_out
 );
 
+localparam TAG_W = ADDR_W - IDX_W - OFFSET_W,
+           TAG_MEM_W = 2 + TAG_W,
+           IDX_SIZE = 2 ** IDX_W;
 
 // |------------------------ Tag Block ------------------------|
 // |- valid -|- dirty -|--------------- tag -------------------|
@@ -26,6 +26,15 @@ module cache_tag_memory # (
 
 // Memory array
 reg  [TAG_MEM_W-1:0] cache_tag_mem[IDX_SIZE-1:0];
+
+// ========= ( FOR SIMULATION ONLY ) ========= //
+// integer i;
+// initial begin
+//     for (i = 0; i < IDX_SIZE; i = i + 1) begin
+//         cache_tag_mem[i] = 0;
+//     end
+// end
+// =========================================== //
 
 always @(iCLK) begin
     if(tag_we) begin

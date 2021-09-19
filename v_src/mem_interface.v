@@ -1,27 +1,29 @@
 module mem_interface # (
     // parameters
-    parameter ADDR_W = 26,
-    parameter DATA_W = 128
+    parameter RAM_ADDR_W = 26,
+              RAM_DATA_W = 128,
+              ADDR_W = 32,
+              DATA_W = 32
 ) (
     // pins
     input iCLK,
     input iRST_n,   // "_n" means active low
 
     // pins : avalon interface
-    input                       avl_wait,
-    input                       avl_readdatavalid,
-    output reg                  avl_read,
-    input       [DATA_W-1:0]    avl_readdata,
-    output reg  [ADDR_W-1:0]    avl_address,
-    output reg  [DATA_W-1:0]    avl_writedata,
-    output reg                  avl_write,
+    input                           avl_wait,
+    input                           avl_readdatavalid,
+    output reg                      avl_read,
+    output reg  [RAM_ADDR_W-1:0]    avl_address,
+    input       [RAM_DATA_W-1:0]    avl_readdata,
+    output reg  [RAM_DATA_W-1:0]    avl_writedata,
+    output reg                      avl_write,
 
-    // pins : CPU
-    input       [ADDR_W-1:0]    cpu_addr,
-    input                       cpu_MemWrite,
-    input       [DATA_W-1:0]    cpu_data_out,
-    input                       cpu_MemRead,
-    output   [DATA_W-1:0]    cpu_data_in,
+    // pins : CACHE
+    input       [ADDR_W-1:0]        mem_addr,
+    input                           mem_MemWrite,
+    input       [DATA_W-1:0]        mem_data_in,
+    input                           mem_MemRead,
+    output      [DATA_W-1:0]        mem_data_out,
 
     output data_ready,
     output reg value_received
@@ -34,8 +36,8 @@ module mem_interface # (
 
 reg [1:0] read_state;
 
-assign data_ready = (read_state == 2'h00 && cpu_MemRead) ? 1'b1 : 1'b0;
-assign cpu_data_in = avl_readdata;
+assign data_ready = (read_state == 2'h00 && mem_MemRead) ? 1'b1 : 1'b0;
+assign mem_data_out = avl_readdata[DATA_W-1:0];
 
 // Logic
 always @(posedge iCLK  or negedge iRST_n) begin
@@ -46,29 +48,29 @@ always @(posedge iCLK  or negedge iRST_n) begin
         avl_address <= 26'h00;
         read_state  <= 2'h00;
     end else begin
-        if (cpu_MemWrite && !avl_wait && cpu_addr > 26'h00) begin
+        if (mem_MemWrite && !avl_wait && mem_addr > 32'h00) begin
             // writing operation:
             // CPU.MemWrite  --> mem_mangt --> avl.write
             // CPU.EN        <-- mem_mangt <-- avl.writerequest
             // CPU.addr      --> mem_mangt --> avl.address
             // CPU.data_out  --> mem_mangt --> avl.writedata[]
-            avl_address     <= cpu_addr;
-            avl_writedata   <= cpu_data_out;
+            avl_address     <= mem_addr[RAM_ADDR_W-1:0];
+            avl_writedata   <= mem_data_in;
             avl_write       <= 1'b1;
-        end else if (!cpu_MemWrite) 
+        end else if (!mem_MemWrite) 
                 avl_write <= 1'b0;
 
         case (read_state)
             0: begin
-                if (!cpu_MemRead) begin
+                if (!mem_MemRead) begin
                     avl_read <= 1'b0;
-                end else if (cpu_MemRead && !avl_wait && cpu_addr > 26'h00) begin
+                end else if (mem_MemRead && !avl_wait && mem_addr > 32'h00) begin
                     // reading operation:
                     // CPU.MemWrite  --> mem_mangt --> avl.read
                     // CPU.addr      --> mem_mangt --> avl.address
                     // CPU.data_in   <-- mem_mangt <-- avl.readdata[]
                     // CPU.valid     <-- mem_mangt <-- avl.readdatavalid
-                    avl_address <= cpu_addr;
+                    avl_address <= mem_addr[RAM_ADDR_W-1:0];
                     avl_read    <= 1'b1;
                     read_state  <= 2'h01;
                 end 

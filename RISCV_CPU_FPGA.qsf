@@ -81,7 +81,7 @@ source RISCV_CPU_FPGA_custom.qsf
 set_global_assignment -name SYNTHESIS_EFFORT AUTO
 set_global_assignment -name FITTER_EFFORT AUTO_FIT
 set_global_assignment -name NUM_PARALLEL_PROCESSORS ALL
-set_global_assignment -name TOP_LEVEL_ENTITY cache_controller
+set_global_assignment -name TOP_LEVEL_ENTITY RISCV_CPU_FPGA
 set_global_assignment -name SYNTH_TIMING_DRIVEN_SYNTHESIS ON
 set_global_assignment -name VERILOG_FILE v_src/cache_tag_memory.v
 set_global_assignment -name VERILOG_FILE v_src/cache_data_memory.v
