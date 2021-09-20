@@ -169,11 +169,11 @@ assign LED = LED_REG;
         // Cache
         .mem_addr           (cache2mem_addr),     // RAM.address  <-- mem_mangt <-- CACHE.addr
         .mem_data_out       (mem2cache_data),     // RAM.data     --> mem_mangt --> CACHE.data
-		.mem_data_in        (cache_data_out),     // RAM.data     <-- mem_mangt <-- CACHE.data
-        .mem_MemRead        (cache_MemRead),
-        .mem_MemWrite       (cache_MemWrite),
+		.mem_data_in        (cache2mem_data),     // RAM.data     <-- mem_mangt <-- CACHE.data
+        .mem_MemRead        (cache2mem_MemRead),
+        .mem_MemWrite       (cache2mem_MemWrite),
         .data_ready         (mem2cache_dataready),
-        .value_received     (value_received)
+        // .value_received     (LED[7:0])      // [TEMP PORT]
 );
 
 //=======================================================
@@ -212,12 +212,13 @@ cache_controller cc (
         .cache2cpu_ready    (cache2cpu_dataready),
         // Cache controller --> RAM (Memory request)
         .cache2mem_addr     (cache2mem_addr),
-        .cache2mem_data     (cache2mem_data_out),
+        .cache2mem_data     (cache2mem_data),
         .cache2mem_MemWrite (cache2mem_MemWrite),
         .cache2mem_MemRead  (cache2mem_MemRead),
         // Cache controller <-- RAM (Memory result)
         .mem2cache_data_in  (mem2cache_data),
-        .mem2cache_ready    (mem2cache_dataready)
+        .mem2cache_ready    (mem2cache_dataready),
+        // .value_received     (LED[7:0])      // [TEMP PORT]
 );
 
 //=======================================================
@@ -265,9 +266,6 @@ end
 reg [4:0] state = 4'h0;
 reg [25:0] counter = 3'h0;
 reg [31:0] data_buffer;
-
-
-// TODO: Comment out the CPU. Create registers for the necessary signals. Test the memory access operation
 
 reg [CPU_ADDR_W-1:0]   cpu2cache_addr;
 reg [CPU_DATA_W-1:0]   cpu2cache_data;
@@ -339,15 +337,16 @@ always @(posedge FPGA_CLK2_50 or negedge Debounce_KEY0) begin
                 8: begin
                     cpu2cache_MemWrite <= 1'b0;
                     cpu2cache_MemRead <= 1'b0;
-                    data_buffer <= cache2cpu_data;
+                    // data_buffer <= cache2cpu_data;
+                    // LED_REG[6:0] <= cache2cpu_data[6:0];
+                    // LED_REG[7] <= 1'b1;
                     state <= 9;
                 end
                 9: begin
-                    // FIXME: Fix the write-back operation
                     cpu2cache_MemWrite <= 1'b1;
                     cpu2cache_MemRead <= 1'b0;
                     cpu2cache_addr <= 32'h84;
-                    cpu2cache_data <= data_buffer + 32'h06;
+                    cpu2cache_data <= 32'h3F;
                     state <= 10;
                 end
                 10: begin
@@ -361,8 +360,7 @@ always @(posedge FPGA_CLK2_50 or negedge Debounce_KEY0) begin
                     cpu2cache_MemRead <= 1'b0;
                     LED_REG[6:0] <= cache2cpu_data[6:0];
                     LED_REG[7] <= 1'b1;
-                    // state <= 12;
-                    // FIXME: =============================
+                    state <= 12;
                 end
                 12: begin
                     cpu2cache_MemWrite <= 1'b0;
@@ -373,8 +371,8 @@ always @(posedge FPGA_CLK2_50 or negedge Debounce_KEY0) begin
                 13: begin
                     cpu2cache_MemWrite <= 1'b0;
                     cpu2cache_MemRead <= 1'b0;
-                    LED_REG[6:0] <= cache2cpu_data[6:0];
-                    LED_REG[7] <= 1'b1;
+                    // LED_REG[6:0] <= cache2cpu_data[6:0];
+                    // LED_REG[7] <= 1'b1;
                     state <= 14;
                 end
                 14: begin

@@ -87,40 +87,69 @@ module tb_cache ;
         iCLK = ~iCLK;
         i = i + 1;
 
-        if (i == 4) begin
+        if (i == 5) begin
             mem2cache_data_in = 234;
             mem2cache_ready = 1;
         end
-        if (i == 5) begin
+        if (i == 6) begin
             mem2cache_data_in = 0;
-            mem2cache_ready = 0;
-        end
-        if (i == 8) begin
-            mem2cache_data_in = 5;
-            mem2cache_ready = 1;
-        end
-        if (i == 9) begin
-            mem2cache_data_in = 0;
-            mem2cache_ready = 0;
-        end
-        if (i == 13) begin
-            mem2cache_data_in = 10;
-            mem2cache_ready = 1;
-        end
-        if (i == 14) begin
-            mem2cache_data_in = 0;
-            mem2cache_ready = 0;
-        end
-        if (i == 30) begin
-            mem2cache_data_in = 20;
-            mem2cache_ready = 1;
-        end
-        if (i == 31) begin
-            mem2cache_data_in = 20;
             mem2cache_ready = 0;
         end
 
-        if (i == 35)
+        if (i == 10) begin
+            mem2cache_data_in = 0;
+            mem2cache_ready = 1;
+        end
+        if (i == 11) begin
+            mem2cache_data_in = 0;
+            mem2cache_ready = 0;
+        end
+
+        if (i == 20) begin
+            mem2cache_data_in = 0;
+            mem2cache_ready = 1;
+        end
+        if (i == 21) begin
+            mem2cache_data_in = 0;
+            mem2cache_ready = 0;
+        end
+        
+        if (i == 35) begin
+            mem2cache_data_in = 56;
+            mem2cache_ready = 1;
+        end
+        if (i == 36) begin
+            mem2cache_data_in = 0;
+            mem2cache_ready = 0;
+        end
+
+        if (i == 38) begin
+            mem2cache_data_in = 15;
+            mem2cache_ready = 1;
+        end
+        if (i == 39) begin
+            mem2cache_data_in = 0;
+            mem2cache_ready = 0;
+        end
+        if (i == 51) begin
+            mem2cache_data_in = 0;
+            mem2cache_ready = 1;
+        end
+        if (i == 52) begin
+            mem2cache_data_in = 0;
+            mem2cache_ready = 0;
+        end
+
+        if (i == 55) begin
+            mem2cache_data_in = 15;
+            mem2cache_ready = 1;
+        end
+        if (i == 56) begin
+            mem2cache_data_in = 0;
+            mem2cache_ready = 0;
+        end
+
+        if (i == 65)
             $stop;
     end
 
@@ -245,7 +274,27 @@ module tb_cache ;
                     state = 13;
                 end
                 13: begin
-                
+                    state = 14;
+                end
+                14: begin
+                    state = 15;
+                end
+                15: begin
+                    cpu2cache_addr = 4;
+                    cpu2cache_data_in = 0;
+                    cpu2cache_rw = 0;
+                    cpu2cache_valid = 1;
+                    $display("Reading Address: 0x%x", cpu2cache_addr);
+                    state = 16;
+                end
+                16: begin
+                    // data should be ready here
+                    cpu2cache_addr = 0;
+                    cpu2cache_data_in = 0;
+                    cpu2cache_rw = 0;
+                    cpu2cache_valid = 0;
+                    $display("Expect 15, Got %d", cache2cpu_data_out);
+                    
                 end
             endcase
         end
