@@ -137,21 +137,25 @@ reg [7:0]                   LED_REG;
 // Min address from cpu to RAM must = 0x3FFFFF
 // Max address from cpu to RAM must = 0x04 
 
+wire [31:0] value_received;
 assign LED = LED_REG;
-// always @(posedge DDR3_CLK, negedge Debounce_KEY0) begin
-//     // LEDs
-//     if (!Debounce_KEY0) begin
-//         LED_REG[7:0] <= 0;
-//     end
-//     else begin
-//         LED_REG[7] <= heart_beat[25] ;
-//         if (cpu2cache_addr == 28'h00) begin
-//             if (cpu2cache_MemWrite) begin
-//                 LED_REG[6:0] <= cpu2cache_data[6:0];
-//             end
-//         end
-//     end
-// end
+
+always @(posedge DDR3_CLK, negedge Debounce_KEY0) begin
+    // LEDs
+    if (!Debounce_KEY0) begin
+        LED_REG[7:0] <= 0;
+    end
+    else begin
+        // LED_REG[7] <= heart_beat[25];
+        LED_REG[7] <= cpu_pcEn;
+        // LED_REG[7] <= value_received[7];
+        // LED_REG[6:0] <= value_received[6:0];
+
+        if (cpu2cache_MemWrite && cpu2cache_addr == 32'h00) begin
+                LED_REG[6:0] <= cpu2cache_data[6:0];
+        end
+    end
+end
 
  mem_interface mi(
 		.iCLK               (FPGA_CLK2_50),
@@ -173,7 +177,7 @@ assign LED = LED_REG;
         .mem_MemRead        (cache2mem_MemRead),
         .mem_MemWrite       (cache2mem_MemWrite),
         .data_ready         (mem2cache_dataready),
-        // .value_received     (LED[7:0])      // [TEMP PORT]
+        .value_received     (value_received)       // [TEMP PORT]
 );
 
 //=======================================================
@@ -217,8 +221,8 @@ cache_controller cc (
         .cache2mem_MemRead  (cache2mem_MemRead),
         // Cache controller <-- RAM (Memory result)
         .mem2cache_data_in  (mem2cache_data),
-        .mem2cache_ready    (mem2cache_dataready),
-        // .value_received     (LED[7:0])      // [TEMP PORT]
+        .mem2cache_ready    (mem2cache_dataready)
+        // .value_received     (value_received)      // [TEMP PORT]
 );
 
 //=======================================================
@@ -263,8 +267,8 @@ always @(posedge FPGA_CLK2_50) begin
     heart_beat <= heart_beat + 1'b1;
 end
 
-reg [4:0] state = 4'h0;
-reg [25:0] counter = 3'h0;
+reg [5:0] state = 6'h0;
+reg [31:0] counter = 32'h0;
 reg [31:0] data_buffer;
 
 reg [CPU_ADDR_W-1:0]   cpu2cache_addr;
@@ -275,14 +279,15 @@ wire                    cpu_pcEn;
 
 always @(posedge FPGA_CLK2_50 or negedge Debounce_KEY0) begin
     if (!Debounce_KEY0) begin
-        state <=  4'h0;
-        counter <= 25'h00;
+        state <=  6'h0;
+        counter <= 32'h00;
         data_buffer <= 0;
     end else begin
         counter <= counter + 1;
         if (cpu_pcEn)
             case (state)
                 0: begin
+                    // Write 5 to address 0x05
                     cpu2cache_MemWrite <= 1'b1;
                     cpu2cache_MemRead <= 1'b0;
                     cpu2cache_addr <= 32'h04;
@@ -290,6 +295,7 @@ always @(posedge FPGA_CLK2_50 or negedge Debounce_KEY0) begin
                     state <= 1;
                 end  
                 1: begin
+                    // Write 10 to address 0x08
                     cpu2cache_MemWrite <= 1'b1;
                     cpu2cache_MemRead <= 1'b0;
                     cpu2cache_addr <= 32'h8;
@@ -297,86 +303,120 @@ always @(posedge FPGA_CLK2_50 or negedge Debounce_KEY0) begin
                     state <= 2;
                 end
                 2: begin
-                    cpu2cache_MemWrite <= 1'b0;
-                    cpu2cache_MemRead <= 1'b1;
-                    cpu2cache_addr <= 26'h8;
-                    state <= 3;
-                end
-                3: begin
+                    // Wait (Simulating the exeution of other instructions)
                     cpu2cache_MemWrite <= 1'b0;
                     cpu2cache_MemRead <= 1'b0;
-                    data_buffer <= cache2cpu_data;
+                    if (counter == 25'b10000000)
+                        state <= 3;
+                end
+                3: begin
+                    // Read address 0x04
+                    cpu2cache_MemWrite <= 1'b0;
+                    cpu2cache_MemRead <= 1'b1;
+                    cpu2cache_addr <= 26'h4;
                     state <= 4;
                 end
                 4: begin
+                    // Store the retreived value to a buffer
                     cpu2cache_MemWrite <= 1'b0;
-                    cpu2cache_MemRead <= 1'b1;
-                    cpu2cache_addr <= 32'h4;
+                    cpu2cache_MemRead <= 1'b0;
+                    data_buffer <= cache2cpu_data;
                     state <= 5;
                 end  
                 5: begin
+                    // Display the value on the LEDs
+                    cpu2cache_MemWrite <= 1'b1;
+                    cpu2cache_MemRead <= 1'b0;
+                    cpu2cache_addr <= 32'h00;
+                    cpu2cache_data <= data_buffer;
+                    state <= 6;
+                end 
+                6: begin
+                    // Wait
+                    cpu2cache_MemWrite <= 1'b0;
+                    cpu2cache_MemRead <= 1'b0;
+                    if (counter == 32'b100000000000000000000000000) begin
+                        state <= 7;
+                        counter <= 0;
+                    end
+                end
+                7: begin
+                    // Read address 0x08
+                    cpu2cache_MemWrite <= 1'b0;
+                    cpu2cache_MemRead <= 1'b1;
+                    cpu2cache_addr <= 32'h8;
+                    state <= 8;
+                end
+                8: begin
+                    // Store the retreived value to a buffer
                     cpu2cache_MemWrite <= 1'b0;
                     cpu2cache_MemRead <= 1'b0;
                     cpu2cache_addr <= 26'h00;
                     data_buffer <= data_buffer + cache2cpu_data;
-                    state <= 6;
-                end 
-                6: begin
-                    cpu2cache_MemWrite <= 1'b1;
-                    cpu2cache_MemRead <= 1'b0;
-                    cpu2cache_addr <= 32'h04;
-                    cpu2cache_data <= data_buffer;
-                    state <= 7;
-                end
-                7: begin
-                    cpu2cache_MemWrite <= 1'b0;
-                    cpu2cache_MemRead <= 1'b1;
-                    cpu2cache_addr <= 26'h4;
-                    state <= 8;
-                end
-                8: begin
-                    cpu2cache_MemWrite <= 1'b0;
-                    cpu2cache_MemRead <= 1'b0;
-                    // data_buffer <= cache2cpu_data;
-                    // LED_REG[6:0] <= cache2cpu_data[6:0];
-                    // LED_REG[7] <= 1'b1;
                     state <= 9;
                 end
                 9: begin
+                    // Display the calculated value on the LEDs
+                    cpu2cache_MemWrite <= 1'b1;
+                    cpu2cache_MemRead <= 1'b0;
+                    cpu2cache_addr <= 32'h00;
+                    cpu2cache_data <= data_buffer;
+                    state <= 10;
+                end
+                10: begin
+                    // Wait
+                    cpu2cache_MemWrite <= 1'b0;
+                    cpu2cache_MemRead <= 1'b0;
+                    if (counter == 32'b100000000000000000000000000) begin
+                        state <= 11;
+                        counter <= 0;
+                    end
+                end
+                11: begin
                     cpu2cache_MemWrite <= 1'b1;
                     cpu2cache_MemRead <= 1'b0;
                     cpu2cache_addr <= 32'h84;
                     cpu2cache_data <= 32'h3F;
-                    state <= 10;
-                end
-                10: begin
-                    cpu2cache_MemWrite <= 1'b0;
-                    cpu2cache_MemRead <= 1'b1;
-                    cpu2cache_addr <= 32'h84;
-                    state <= 11;
-                end
-                11: begin
-                    cpu2cache_MemWrite <= 1'b0;
-                    cpu2cache_MemRead <= 1'b0;
-                    LED_REG[6:0] <= cache2cpu_data[6:0];
-                    LED_REG[7] <= 1'b1;
                     state <= 12;
                 end
                 12: begin
                     cpu2cache_MemWrite <= 1'b0;
                     cpu2cache_MemRead <= 1'b1;
-                    cpu2cache_addr <= 32'h04;
+                    cpu2cache_addr <= 32'h84;
                     state <= 13;
                 end
                 13: begin
+                    // Store the retreived value to a buffer
                     cpu2cache_MemWrite <= 1'b0;
                     cpu2cache_MemRead <= 1'b0;
-                    // LED_REG[6:0] <= cache2cpu_data[6:0];
-                    // LED_REG[7] <= 1'b1;
+                    data_buffer <= cache2cpu_data;
                     state <= 14;
                 end
                 14: begin
-                    
+                    // Display the calculated value on the LEDs
+                    cpu2cache_MemWrite <= 1'b1;
+                    cpu2cache_MemRead <= 1'b0;
+                    cpu2cache_addr <= 32'h00;
+                    cpu2cache_data <= data_buffer;
+                    state <= 15;
+                end
+                15: begin
+                    // Wait
+                    cpu2cache_MemWrite <= 1'b0;
+                    cpu2cache_MemRead <= 1'b0;
+                    if (counter == 32'b100000000000000000000000000) begin
+                        state <= 16;
+                        counter <= 0;
+                    end
+                end
+                16: begin
+                    state <= 17;
+                end
+                17: begin
+                    state <= 18;
+                end
+                18: begin
+                    state <= 2;
                 end
             endcase
     end

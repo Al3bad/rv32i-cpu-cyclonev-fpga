@@ -53,7 +53,7 @@
 # ============== GCD algo ==============
 
 
-#     # Store data into the RAM
+    # Store data into the RAM
 # init:
 #     addi s1, x0, 8
 
@@ -110,17 +110,31 @@
     addi x11, x0, 7         # x11 = 7    (imm/val)
     sw x11, 0(x10)          # x11[val] -> x10[addr + 0]
 
-    addi x11, x0, 3         # x11 = 3    (imm/val)
-    sw x11, 4(x10)          # x11[val] -> x10[addr + 4]
+    nop
+    nop
+    nop
+
+    # addi x11, x0, 3         # x11 = 3    (imm/val)
+    # sw x11, 4(x10)          # x11[val] -> x10[addr + 4]
+
+    nop
+    nop
+    nop
 
     lw    x1, 0(x10)		# x1 <- x10[addr + 0]
+
     nop
-    lw    x2, 4(x10)		# x2 <- x10[addr + 4]
+    nop
+
+    # lw    x2, 4(x10)		# x2 <- x10[addr + 4]
+    
+    nop
     nop
 
 
-    add  x12, x1, x2        # x12 = x1 + x2
-    addi x12, x12, -5
+    # add  x12, x1, x2        # x12 = x1 + x2
+    # addi x12, x12, 10
+    addi x12, x1, 10
 
     # Display the result on the LEDs
     # X23 = 0x00

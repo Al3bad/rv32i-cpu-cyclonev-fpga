@@ -19,6 +19,9 @@ module tb_cache ;
     reg               cpu2cache_rw;             // req type: 0 = read, 1 = write
     reg               cpu2cache_valid;
 
+    reg               cpu2cache_MemWrite;
+    reg [7:0]         LED; 
+
     // CPU <-- Cache controller (Cache result)
     wire [DATA_W-1:0]   cache2cpu_data_out;    // data returned to the cpu
     wire              cache2cpu_ready;
@@ -31,8 +34,8 @@ module tb_cache ;
     // wire               cache_valid,
 
     // Cache controller <-- RAM (Memory result)
-    reg [DATA_W-1:0]    mem2cache_data_in;    // data returned to the cache controller
-    reg               mem2cache_ready;
+    wire [DATA_W-1:0]    mem2cache_data_in;    // data returned to the cache controller
+    wire               mem2cache_ready;
 
     cache_controller cc (
         .iCLK(iCLK),
@@ -55,28 +58,63 @@ module tb_cache ;
         .mem2cache_ready(mem2cache_ready)
     );
 
+    reg             ddr3_avl_wait;
+    reg             ddr3_avl_readdatavalid;
+    reg   [127:0]   ddr3_avl_readdata;
+
+
+    wire  [25:0]    ddr3_avl_address;
+    wire  [127:0]   ddr3_avl_writedata;
+    wire            ddr3_avl_read;
+    wire            ddr3_avl_write;
+
+    mem_interface mi (
+        .iCLK               (iCLK),
+        .iRST_n             (iRST_n),
+        
+        // Avalon Interface
+        .avl_wait           (ddr3_avl_wait),                 
+        .avl_address        (ddr3_avl_address),                      
+        .avl_readdatavalid  (ddr3_avl_readdatavalid),                 
+        .avl_readdata       (ddr3_avl_readdata),                      
+        .avl_writedata      (ddr3_avl_writedata),                     
+        .avl_read           (ddr3_avl_read),                          
+        .avl_write          (ddr3_avl_write),
+
+        // Cache
+        .mem_addr           (cache2mem_addr),     // RAM.address  <-- mem_mangt <-- CACHE.addr
+        .mem_data_out       (mem2cache_data_in),     // RAM.data     --> mem_mangt --> CACHE.data
+        .mem_data_in        (cache2mem_data),     // RAM.data     <-- mem_mangt <-- CACHE.data
+        .mem_MemRead        (cache2mem_MemRead),
+        .mem_MemWrite       (cache2mem_MemWrite),
+        .data_ready         (mem2cache_ready)
+    );
+
 
     reg [31:0] i;
     reg [31:0] state;
     reg [31:0] data_buffer;
 
-    
 
     initial begin
         state = 0;
         i = 0;
-        iCLK = 1'b0;
+        iCLK = 1'b1;
         iRST_n = 1;
         cpu2cache_valid = 0;
         cpu2cache_addr = 0;
         cpu2cache_data_in = 0;
         cpu2cache_rw = 0;
-        mem2cache_data_in = 0;
-        mem2cache_ready = 0;
-        #1;
+        cpu2cache_MemWrite = 0;
+
+        ddr3_avl_wait = 0;
+        ddr3_avl_readdatavalid = 0;
+        ddr3_avl_readdata = 0;
+
         iRST_n = 0;
-        #1;
+        #2;
         iRST_n = 1;
+        #2;
     end
 
     always begin
@@ -87,69 +125,74 @@ module tb_cache ;
         iCLK = ~iCLK;
         i = i + 1;
 
-        if (i == 5) begin
-            mem2cache_data_in = 234;
-            mem2cache_ready = 1;
+        if (i == 7) begin
+            ddr3_avl_readdata = 234;
+            ddr3_avl_readdatavalid = 1;
         end
-        if (i == 6) begin
-            mem2cache_data_in = 0;
-            mem2cache_ready = 0;
-        end
-
-        if (i == 10) begin
-            mem2cache_data_in = 0;
-            mem2cache_ready = 1;
-        end
-        if (i == 11) begin
-            mem2cache_data_in = 0;
-            mem2cache_ready = 0;
+        if (i == 8) begin
+            ddr3_avl_readdata = 0;
+            ddr3_avl_readdatavalid = 0;
         end
 
-        if (i == 20) begin
-            mem2cache_data_in = 0;
-            mem2cache_ready = 1;
+        if (i == 13) begin
+            ddr3_avl_readdata = 234;
+            ddr3_avl_readdatavalid = 1;
         end
-        if (i == 21) begin
-            mem2cache_data_in = 0;
-            mem2cache_ready = 0;
+        if (i == 14) begin
+            ddr3_avl_readdata = 0;
+            ddr3_avl_readdatavalid = 0;
         end
-        
+
+        // if (i == 30) begin
+        //     ddr3_avl_readdata = 234;
+        //     ddr3_avl_readdatavalid = 1;
+        // end
+        // if (i == 31) begin
+        //     ddr3_avl_readdata = 0;
+        //     ddr3_avl_readdatavalid = 0;
+        // end
+
         if (i == 35) begin
-            mem2cache_data_in = 56;
-            mem2cache_ready = 1;
+            ddr3_avl_readdata = 43;
+            ddr3_avl_readdatavalid = 1;
         end
         if (i == 36) begin
-            mem2cache_data_in = 0;
-            mem2cache_ready = 0;
+            ddr3_avl_readdata = 0;
+            ddr3_avl_readdatavalid = 0;
         end
 
-        if (i == 38) begin
-            mem2cache_data_in = 15;
-            mem2cache_ready = 1;
+        if (i == 42) begin
+            ddr3_avl_readdata = 43;
+            ddr3_avl_readdatavalid = 1;
         end
-        if (i == 39) begin
-            mem2cache_data_in = 0;
-            mem2cache_ready = 0;
-        end
-        if (i == 51) begin
-            mem2cache_data_in = 0;
-            mem2cache_ready = 1;
-        end
-        if (i == 52) begin
-            mem2cache_data_in = 0;
-            mem2cache_ready = 0;
+        if (i == 43) begin
+            ddr3_avl_readdata = 0;
+            ddr3_avl_readdatavalid = 0;
         end
 
         if (i == 55) begin
-            mem2cache_data_in = 15;
-            mem2cache_ready = 1;
+            ddr3_avl_readdata = 15;
+            ddr3_avl_readdatavalid = 1;
         end
         if (i == 56) begin
-            mem2cache_data_in = 0;
-            mem2cache_ready = 0;
+            ddr3_avl_readdata = 0;
+            ddr3_avl_readdatavalid = 0;
+        end
+        if (i == 57) begin
+            ddr3_avl_readdata = 10;
+            ddr3_avl_readdatavalid = 1;
         end
 
-        if (i == 65)
+        if (i == 59) begin
+            ddr3_avl_readdata = 15;
+            ddr3_avl_readdatavalid = 1;
+        end
+        if (i == 60) begin
+            ddr3_avl_readdata = 0;
+            ddr3_avl_readdatavalid = 0;
+        end
+
+        if (i == 75)
             $stop;
     end
 
@@ -254,6 +297,7 @@ module tb_cache ;
                     cpu2cache_valid = 1;
                     $display("Writing to Address: 0x%x", cpu2cache_addr);
                     state = 11;
+                    // $stop;
                 end
                 11: begin
                     // Confirm that the data was written to memory
@@ -293,11 +337,23 @@ module tb_cache ;
                     cpu2cache_data_in = 0;
                     cpu2cache_rw = 0;
                     cpu2cache_valid = 0;
+
+                    cpu2cache_MemWrite = 1;
+                    // LED = cache2cpu_data_out;
                     $display("Expect 15, Got %d", cache2cpu_data_out);
+                    state = 17;
+                end
+                17: begin
+                    cpu2cache_MemWrite = 0;
                     
                 end
             endcase
         end
+    end
+
+    always @(posedge iCLK) begin
+        if (cpu2cache_MemWrite)
+            LED = cache2cpu_data_out;
     end
 
 endmodule
