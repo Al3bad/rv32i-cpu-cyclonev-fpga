@@ -131,7 +131,7 @@ always @(posedge cache2cpu_ready) begin
 end
 
 // Infinite-State Machine
-always @(state or mem2cache_ready or cpu2cache_valid or iRST_n) begin
+always @(state or mem2cache_ready or cpu2cache_valid or negedge iRST_n) begin
 // always @(posedge iCLK or posedge cpu2cache_valid or negedge iRST_n) begin
     // Default values
     if (!iRST_n) begin
@@ -140,7 +140,7 @@ always @(state or mem2cache_ready or cpu2cache_valid or iRST_n) begin
         _mem_req_data_out = 0;
         _mem_req_MemRead = 0;
         _mem_req_MemWrite = 0;
-        _cpu_data_ready = 0;
+        _cpu_data_ready = 1;
     end else begin
         _state = state;
         cache_tag_we = 0;
@@ -150,8 +150,8 @@ always @(state or mem2cache_ready or cpu2cache_valid or iRST_n) begin
         
         case (state)
             IDLE: begin
-                _mem_req_MemRead = 0;
-                _mem_req_MemWrite = 0;
+                // _mem_req_MemRead = 0;
+                // _mem_req_MemWrite = 0;
                 // Wait for a request from the CPU
                 if (cpu2cache_valid) begin
                     _cpu_data_ready = 1'b0;     // Stop the CPU
@@ -196,7 +196,7 @@ always @(state or mem2cache_ready or cpu2cache_valid or iRST_n) begin
                         _mem_req_MemRead  = 1'b1;
                         _mem_req_addr = cpu2cache_addr;
                         _state = ALLOCATE;
-                        $display("READING Memory ...");
+                        // $display("READING Memory ...");
                     end else begin
                         // miss with a dirty line
                         // CACHE.memWrite       --> mem_controller.memWrite

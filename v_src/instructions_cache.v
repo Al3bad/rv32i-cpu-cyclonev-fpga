@@ -1,6 +1,6 @@
 module instructions_cache # (
     // parameters
-    parameter ADDR_W = 32,
+    parameter ADDR_W = 8,
               DATA_W = 32
 ) (
     input                           iCLK,
@@ -21,18 +21,24 @@ module instructions_cache # (
 );
 
 wire [DATA_W-1:0]    cache2cpu_data;
-wire [ADDR_W-1:0]   cpu2mem_addr;
 wire                cache2mem_MemRead;
 wire                cache_dataready;
+wire [ADDR_W-1:0]   cache_addr_out;
+wire [32-1:0]       _rom_addr;
+assign _rom_addr = cache_addr_out / 4;
 
-// assign rom_addr = addr;
+assign rom_addr = cache_addr_out? _rom_addr[ADDR_W-1:0] : 32'h00;
+
+reg [1:0] state;
+reg pending, enable;
+
 cache_controller cc (
         .iCLK               (iCLK),
         .iRST_n             (iRST_n),
         // this --> Cache controller (CPU request)
         .cpu2cache_rw       (0),        // always read
-        .cpu2cache_valid    (1),        // always enabled
-        .cpu2cache_addr     (addr),
+        .cpu2cache_valid    (enable),        // always enabled
+        .cpu2cache_addr     ({{32-ADDR_W{1'b0}},addr} * 3'h4),
 
         // this <-- Cache controller (Cache result)
         .cache2cpu_data_out (cache2cpu_data),
@@ -42,61 +48,64 @@ cache_controller cc (
 
         // Cache controller --> this (Memory request)
         .cache2mem_MemRead  (cache2mem_MemRead),
-        .cache2mem_addr     (rom_addr),
+        .cache2mem_addr     (cache_addr_out),
         // Cache controller <-- ROM (Memory result)
         .mem2cache_data_in  (rom_result),
         // Cache controller <-- this (Memory result)
         .mem2cache_ready    (1)
 );
 
-reg [1:0] state;
-reg pending;
 assign instruction_ready = !pending;
 
-initial begin
-    pending = 1;
-end
+//initial begin
+//    pending = 0;
+//    instruction_out = 0;
+//end
 
 always @(addr or state or iRST_n) begin
     if (!iRST_n) begin
         pending = 0;
+    end else begin
+        if (state == 0 && !pending)
+            pending =  1;
+        else if (state == 3 && pending)
+            pending =  0;
     end
-    if (state == 0 && !pending)
-        pending =  1;
-    else if (state == 0 && pending)
-        pending =  0;
 end
 
+// always @(posedge iCLK) begin
+//     instruction_out = cache2cpu_data;
+// end
+
 always @(posedge iCLK or negedge iRST_n) begin
-    $display("instruction cashe state: %d", state);
+    // $display("instruction cashe state: %d", state);
     if (!iRST_n) begin
         state = 0;
+        enable = 0;
     end else begin
         case (state)
             // Stop the program counter and go to state 1;
             0: begin
                 if (pending) begin
                     state = 1;
+                    enable = 1;
                 end else
                     state = 0;
             end 
             1: begin
-                // Address --> cache.addr
                 // Wait for the cache ready signal
-                instruction_out = cache2cpu_data;
                 if (cache_dataready) begin
-                    state = 0;
-                end else if (cache2mem_MemRead) begin
-                    // Address --> ROM.addr [done above]
-                    // ready=1 --> CACHE.controller
-                    $display("ROM instruction: 0X%x", rom_result);
-                    state = 0;
+                    instruction_out = cache2cpu_data;
+                    enable = 0;
+                    state = 2;
                 end
             end 
             2: begin
-                if (cache_dataready) begin
-                    state = 0;
-                end
+                state = 3;
+            end
+            3: begin
+                
+                state = 0;
             end
         endcase
     end

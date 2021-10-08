@@ -81,8 +81,9 @@ source RISCV_CPU_FPGA_custom.qsf
 set_global_assignment -name SYNTHESIS_EFFORT AUTO
 set_global_assignment -name FITTER_EFFORT AUTO_FIT
 set_global_assignment -name NUM_PARALLEL_PROCESSORS ALL
-set_global_assignment -name TOP_LEVEL_ENTITY RISCV_CPU_FPGA
+set_global_assignment -name TOP_LEVEL_ENTITY CPU_pipelined
 set_global_assignment -name SYNTH_TIMING_DRIVEN_SYNTHESIS ON
+set_global_assignment -name VERILOG_FILE v_src/instructions_cache.v
 set_global_assignment -name VERILOG_FILE v_src/cache_tag_memory.v
 set_global_assignment -name VERILOG_FILE v_src/cache_data_memory.v
 set_global_assignment -name VERILOG_FILE v_src/cache_controller.v
@@ -116,6 +117,9 @@ set_global_assignment -name QIP_FILE PLL_25.qip
 set_global_assignment -name SIP_FILE PLL_25.sip
 set_global_assignment -name VECTOR_WAVEFORM_FILE CPU_SIM.vwf
 set_global_assignment -name SOURCE_FILE db/RISCV_CPU_FPGA.cmp.rdb
+set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
+set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top
+set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to FPGA_CLK1_50
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to FPGA_CLK2_50
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to FPGA_CLK3_50
@@ -422,7 +426,4 @@ set_instance_assignment -name GLOBAL_SIGNAL OFF -to u0|hps|hps_io|border|hps_sdr
 set_instance_assignment -name GLOBAL_SIGNAL OFF -to u0|hps|hps_io|border|hps_sdram_inst|p0|umemphy|uread_datapath|reset_n_fifo_wraddress[3] -tag __hps_sdram_p0
 set_instance_assignment -name ENABLE_BENEFICIAL_SKEW_OPTIMIZATION_FOR_NON_GLOBAL_CLOCKS ON -to u0|hps|hps_io|border|hps_sdram_inst -tag __hps_sdram_p0
 set_instance_assignment -name PLL_COMPENSATION_MODE DIRECT -to u0|hps|hps_io|border|hps_sdram_inst|pll0|fbout -tag __hps_sdram_p0
-set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
-set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top
-set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top

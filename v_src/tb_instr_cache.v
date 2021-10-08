@@ -1,7 +1,7 @@
 `timescale 1ns/1ps
 
 module tb_instr_cache;
-    parameter  ADDR_W    = 32,
+    parameter  ADDR_W    = 8,
                DATA_W    = 32;
 
     reg               iCLK;
@@ -60,7 +60,7 @@ module tb_instr_cache;
 
         iCLK = 1'b1;
         iRST_n = 1;
-
+        #2
         iRST_n = 0;
         #2;
         iRST_n = 1;
@@ -79,48 +79,53 @@ module tb_instr_cache;
             $stop;
     end
 
-    always @(posedge iCLK) begin
+    always @(posedge iCLK or negedge iRST_n) begin
+        if (!iRST_n) begin
+            state = 0;
+            addr = 0;
+        end
+        else
         if (instruction_ready) begin
-            // $display("--> Instruction: 0x%x", state);
+            $display("--> address: 0x%x", addr);
+            $display("--> Instruction: 0x%x", instruction);
             case (state)
                 0: begin
                     // Does nothing
                     addr = 32'd0;
-
                     state = 1;
                 end
                 1: begin
-                    addr = 32'd4;
+                    addr = 32'd1;
                     state = 2;
                 end
                 2: begin
-                    addr = 32'd8;
+                    addr = 32'd2;
                     state = 3;
                 end
                 3: begin
-                    addr = 32'd12;
+                    addr = 32'd3;
                     state = 4;
                 end
                 4: begin
-                    addr = 32'd16;
+                    addr = 32'd4;
                     state = 5;
                 end
                 5: begin
-                    addr = 32'd20;
+                    addr = 32'd5;
                     state = 6;
                 end
                 6: begin
-                    addr = 32'd24;
+                    addr = 32'd6;
 
                     state = 7;
                 end
                 7: begin
-                    addr = 32'd28;
+                    addr = 32'd7;
 
                     state = 8;
                 end
                 8: begin
-                    addr = 32'd32;
+                    addr = 32'd8;
                     state = 9;
                 end
                 9: begin
