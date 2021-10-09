@@ -17,7 +17,8 @@ module instructions_cache # (
     output [ADDR_W-1:0]             rom_addr,
 
     // this <-- ROM (Memory result)
-    input [DATA_W-1:0]              rom_result    // data returned to the cache controller
+    input [DATA_W-1:0]              rom_result,    // data returned to the cache controller
+    output monitor
 );
 
 wire [DATA_W-1:0]    cache2cpu_data;
@@ -30,15 +31,18 @@ assign _rom_addr = cache_addr_out / 4;
 assign rom_addr = cache_addr_out? _rom_addr[ADDR_W-1:0] : 32'h00;
 
 reg [1:0] state;
-reg pending, enable;
+reg pending, enable, return;
+
+assign monitor = cache2mem_MemRead;
 
 cache_controller cc (
         .iCLK               (iCLK),
         .iRST_n             (iRST_n),
         // this --> Cache controller (CPU request)
-        .cpu2cache_rw       (0),        // always read
-        .cpu2cache_valid    (enable),        // always enabled
+        .cpu2cache_rw       (0),            // always read
+        .cpu2cache_valid    (enable),
         .cpu2cache_addr     ({{32-ADDR_W{1'b0}},addr} * 3'h4),
+        .cpu2cache_data_in  (0),
 
         // this <-- Cache controller (Cache result)
         .cache2cpu_data_out (cache2cpu_data),
@@ -52,15 +56,10 @@ cache_controller cc (
         // Cache controller <-- ROM (Memory result)
         .mem2cache_data_in  (rom_result),
         // Cache controller <-- this (Memory result)
-        .mem2cache_ready    (1)
+        .mem2cache_ready    (return)
 );
 
 assign instruction_ready = !pending;
-
-//initial begin
-//    pending = 0;
-//    instruction_out = 0;
-//end
 
 always @(addr or state or iRST_n) begin
     if (!iRST_n) begin
@@ -68,20 +67,20 @@ always @(addr or state or iRST_n) begin
     end else begin
         if (state == 0 && !pending)
             pending =  1;
-        else if (state == 3 && pending)
+        else if (state == 0 && pending)
             pending =  0;
     end
 end
 
-// always @(posedge iCLK) begin
-//     instruction_out = cache2cpu_data;
-// end
+reg [ADDR_W-1:0] old_addr;
 
 always @(posedge iCLK or negedge iRST_n) begin
     // $display("instruction cashe state: %d", state);
     if (!iRST_n) begin
         state = 0;
         enable = 0;
+        return = 0;
+        old_addr = -1;
     end else begin
         case (state)
             // Stop the program counter and go to state 1;
@@ -89,22 +88,27 @@ always @(posedge iCLK or negedge iRST_n) begin
                 if (pending) begin
                     state = 1;
                     enable = 1;
+                    return = 0;
+                    // old_addr = addr;
                 end else
                     state = 0;
             end 
             1: begin
                 // Wait for the cache ready signal
-                if (cache_dataready) begin
-                    instruction_out = cache2cpu_data;
-                    enable = 0;
+                if (cache2mem_MemRead) begin
                     state = 2;
                 end
             end 
             2: begin
-                state = 3;
+                return = 1;
+                if (cache_dataready) begin
+                    instruction_out = cache2cpu_data;
+                    enable = 0;
+                    state = 3;
+                end
             end
             3: begin
-                
+                return = 0;
                 state = 0;
             end
         endcase

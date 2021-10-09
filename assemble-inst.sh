@@ -2,10 +2,10 @@
 
 input="./code.s"
 hexFile="./dump.hex"
-output="./program.mif"
+output="./quartus-project/program.mif"
 
 # Assemble the instructions and dump them into a temporary file
-java -jar ./../RARS.jar a dump .text HexText "$hexFile" "$input"
+java -jar ./RARS.jar a dump .text HexText "$hexFile" "$input"
 
 # Generate the .mif file
 echo "WIDTH=32;" > "$output"

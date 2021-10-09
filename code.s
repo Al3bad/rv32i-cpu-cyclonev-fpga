@@ -108,20 +108,20 @@
     addi x10, x0, 8         # x10 = 0x08 (addr)
 
     addi x11, x0, 7         # x11 = 7    (imm/val)
-    sw x11, 0(x10)          # x11[val] -> x10[addr + 0]
+    # sw x11, 0(x10)          # x11[val] -> x10[addr + 0]
 
     nop
     nop
     nop
 
-    # addi x11, x0, 3         # x11 = 3    (imm/val)
+    addi x11, x0, 3         # x11 = 3    (imm/val)
     # sw x11, 4(x10)          # x11[val] -> x10[addr + 4]
 
     nop
     nop
     nop
 
-    lw    x1, 0(x10)		# x1 <- x10[addr + 0]
+    # lw    x1, 0(x10)		# x1 <- x10[addr + 0]
 
     nop
     nop
@@ -134,7 +134,7 @@
 
     # add  x12, x1, x2        # x12 = x1 + x2
     # addi x12, x12, 10
-    addi x12, x1, 10
+    addi x12, x11, 10
 
     # Display the result on the LEDs
     # X23 = 0x00

@@ -25,8 +25,7 @@ module mem_interface # (
     input                           mem_MemRead,
     output reg  [DATA_W-1:0]        mem_data_out,
 
-    output data_ready,
-    output reg [DATA_W-1:0] value_received
+    output data_ready
 );
 
 // RAM size      = 1 GB = 1,000,000,000 Bytes
@@ -71,7 +70,6 @@ always @(posedge iCLK or negedge iRST_n) begin
         read_state  <= 2'h00;
         write_state <= 2'h00;
     end else begin
-        value_received[7] = avl_readdatavalid;
         case (write_state)
             0: begin
                 if (mem_MemWrite && !avl_wait && mem_addr > 32'h00) begin
