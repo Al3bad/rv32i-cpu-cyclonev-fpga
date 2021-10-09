@@ -1,5 +1,6 @@
 *
 !.gitignore
+!README.md
 !PLL_25*
 !/quartus-project
 !/quartus-project/RISCV_CPU_FPGA.v
