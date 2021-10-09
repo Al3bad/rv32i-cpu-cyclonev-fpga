@@ -1,6 +1,6 @@
 # RISC-V soft processor core for Intel Cyclone V FPGAs
 
-https://img.shields.io/badge/version-ALPHA-green
+![version_badge](https://img.shields.io/badge/version-ALPHA-green)
 
 ## Project Description
 
