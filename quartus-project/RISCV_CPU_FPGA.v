@@ -238,6 +238,7 @@ assign cpu_pcEn = (cache2cpu_dataready)? 1'b1 : 1'b0;
 CPU_pipelined cpu (
     .iRST_n     (Debounce_KEY0),
     .clk        (FPGA_CLK2_50),
+    .rom_clk    (DDR3_CLK),
     .pcEn       (cpu_pcEn),
 
     .WB_ALUout  (wb_data),    // this port is not needed

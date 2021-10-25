@@ -1,8 +1,8 @@
 module cache_controller # (
     parameter  ADDR_W    = 32,
                DATA_W    = 32,
-               OFFSET_W  = 2,
-               IDX_W     = 5
+               IDX_W     = 5,
+               OFFSET_W  = 2
 ) (
     input               iCLK,
     input               iRST_n,

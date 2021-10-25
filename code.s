@@ -73,77 +73,78 @@
 #     addi  a2, x0, 8         # address of data
 #     lw    a1, 4(a2)			# load the second integer from RAM in register a1 (b)
 #     nop
+    addi a1, x0, 10
 
 #     lw    a0, 0(a2)			# load the first integer from RAM in register a0 (a)
 #     nop
+    addi a0, x0, 45
 
-# gcd:
-# 	jal   while_codition		# jump to the 
-# while_loop:
-# 	blt   a0, a1, else		# branch to "else" label if a < b
-# 	sub   a0, a0, a1		# a = a - b
-# 	jal   while_codition
+gcd:
+	jal   while_codition		# jump to the 
+while_loop:
+	blt   a0, a1, else		# branch to "else" label if a < b
+	sub   a0, a0, a1		# a = a - b
+	jal   while_codition
 	
-# else:
-# 	sub   a1, a1, a0		# b = b - a
+else:
+	sub   a1, a1, a0		# b = b - a
 	
-# while_codition:
-# 	bne   a0, a1 while_loop		# while(a != b), do the loob
+while_codition:
+	bne   a0, a1 while_loop		# while(a != b), do the loob
 	
-# 	addi  a1, x0, 8			# address of data
-# 	sw    a0, 8(a1)			# store the final result in a0 to RAM (8 bytes offset)
+	addi  a1, x0, 8			# address of data
+	sw    a0, 8(a1)			# store the final result in a0 to RAM (8 bytes offset)
 
-#     # add a0, a0, a1  # a0 = 55 [temp]
-#     # Display the result on the LEDs
-#     addi x23, x0, 0
-#     sw a0, 0(x23)
+    # Display the result on the LEDs
+    addi x23, x0, 0
+    sw a0, 0(x23)
 
-# inf_loop:
-#     nop
-#     jal inf_loop
+inf_loop:
+    nop
+    jal inf_loop
 
 # ============== Memory W/R test ==============
 
     # Store the value 10 in memeory location 0x0000_0000    (operand 1)
-    addi x10, x0, 8         # x10 = 0x08 (addr)
+#     addi x10, x0, 8         # x10 = 0x08 (addr)
 
-    addi x11, x0, 7         # x11 = 7    (imm/val)
-    # sw x11, 0(x10)          # x11[val] -> x10[addr + 0]
+#     addi x11, x0, 7         # x11 = 7    (imm/val)
+#     # sw x11, 0(x10)          # x11[val] -> x10[addr + 0]
 
-    nop
-    nop
-    nop
+#     nop
+#     nop
+#     nop
 
-    addi x11, x0, 3         # x11 = 3    (imm/val)
-    # sw x11, 4(x10)          # x11[val] -> x10[addr + 4]
+#     addi x11, x0, 3         # x11 = 3    (imm/val)
+#     # sw x11, 4(x10)          # x11[val] -> x10[addr + 4]
 
-    nop
-    nop
-    nop
+#     nop
+#     nop
+#     nop
 
-    # lw    x1, 0(x10)		# x1 <- x10[addr + 0]
+#     # lw    x1, 0(x10)		# x1 <- x10[addr + 0]
 
-    nop
-    nop
+#     nop
+#     nop
 
-    # lw    x2, 4(x10)		# x2 <- x10[addr + 4]
+#     # lw    x2, 4(x10)		# x2 <- x10[addr + 4]
     
-    nop
-    nop
+#     nop
+#     nop
 
 
-    # add  x12, x1, x2        # x12 = x1 + x2
-    # addi x12, x12, 10
-    addi x12, x11, 10
+#     # add  x12, x1, x2        # x12 = x1 + x2
+#     # addi x12, x12, 10
+#     addi x12, x11, 10
 
-    # Display the result on the LEDs
-    # X23 = 0x00
-    addi x23, x0, 0
-    sw x12, 0(x23)           # x12[val]  -> x23[addr]
+#     # Display the result on the LEDs
+#     # X23 = 0x00
+#     addi x23, x0, 0
+#     sw x12, 0(x23)           # x12[val]  -> x23[addr]
 
-    nop
-    nop
-inf_loop:
-    nop
-    nop
-    jal inf_loop
+#     nop
+#     nop
+# inf_loop:
+#     nop
+#     nop
+#     jal inf_loop
