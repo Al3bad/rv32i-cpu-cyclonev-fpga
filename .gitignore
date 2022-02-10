@@ -1,27 +1,17 @@
-*
+# Ignore files & directories in the root
+/*
+/*/
+/rv32i_cpu_de10_nano/*
+
+# un-ignore files
 !.gitignore
 !README.md
-!PLL_25*
-!/quartus-project
-!/quartus-project/RISCV_CPU_FPGA.v
-!/quartus-project/RISCV_CPU_FPGA.qpf
-!/quartus-project/RISCV_CPU_FPGA.htm
-!/quartus-project/RISCV_CPU_FPGA_assignment_defaults.qdf
-!/quartus-project/CPU.bdf
-!/quartus-project/CPU_pipelined.bdf
-!/quartus-project/soc_system.qsys
-!/quartus-project/assemble-inst.sh
-!/quartus-project/code.s
-!/quartus-project/*.qsf
 
-!/quartus-project/v_src
-!/quartus-project/v_src/*.v
-!/quartus-project/mux_src
-!/quartus-project/mux_src/**
-!/quartus-project/module_symbols
-!/quartus-project/module_symbols/*
-!/quartus-project/ip
-!/quartus-project/ip/**
-!/quartus-project/soc_system
-!/quartus-project/soc_system/**
-
+# un-ignore files in the quartus project
+!/rv32i_cpu_de10_nano
+!/rv32i_cpu_de10_nano/modules
+!/rv32i_cpu_de10_nano/rv32i_cpu_de10_nano.htm
+!/rv32i_cpu_de10_nano/rv32i_cpu_de10_nano.qpf
+!/rv32i_cpu_de10_nano/rv32i_cpu_de10_nano.qsf
+!/rv32i_cpu_de10_nano/rv32i_cpu_de10_nano.sdc
+!/rv32i_cpu_de10_nano/rv32i_cpu_de10_nano.v

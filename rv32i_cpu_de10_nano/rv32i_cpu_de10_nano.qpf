@@ -1,0 +1,6 @@
+DATE = "17:30:55 February 10, 2022"
+QUARTUS_VERSION = "16.0.2"
+
+# Revisions
+
+PROJECT_REVISION = "rv32i_cpu_de10_nano"
